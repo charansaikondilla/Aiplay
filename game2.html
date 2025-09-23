@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aiplay – Bubble Pop Quiz</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(to bottom, #87CEEB 0%, #B0E0E6 50%, #E0F6FF 100%); /* Pure sky theme: light to deeper sky blues */
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            touch-action: manipulation; /* Improves touch responsiveness */
+        }
+
+        #gameContainer {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        #gameCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        #problem {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            left: 20px; /* Make it full width for longer questions */
+            z-index: 10;
+            color: #333;
+            font-size: 20px; /* Slightly smaller for longer text */
+            font-weight: bold;
+            text-align: center;
+            text-shadow: 1px 1px 2px rgba(255,255,255,0.8);
+            line-height: 1.4;
+            max-width: 80%;
+            margin: 0 auto;
+        }
+
+        #instructions {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            color: #333;
+            font-size: 16px;
+            text-align: center;
+            text-shadow: 1px 1px 2px rgba(255,255,255,0.8);
+        }
+
+        .bubble {
+            position: absolute;
+            bottom: -100px; /* Start lower for bigger size */
+            width: 80px; /* Bigger bubbles */
+            height: 80px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,1) 0%, rgba(135,206,235,0.9) 50%, rgba(100,149,237,0.7) 100%); /* Same shiny sky-blue gradient for all */
+            border: 3px solid rgba(255,255,255,1); /* Thicker white border for shine */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 12px; /* Smaller font for text options */
+            font-weight: bold;
+            color: #333;
+            text-align: center;
+            cursor: pointer; /* Ensure cursor changes to pointer on hover */
+            user-select: none;
+            transition: transform 0.1s ease;
+            box-shadow: 
+                0 0 20px rgba(255,255,255,0.5), /* Outer glow for shine */
+                0 4px 12px rgba(0,0,0,0.2); /* Deeper shadow */
+            word-wrap: break-word;
+            padding: 5px;
+            overflow: hidden;
+            max-width: 70px; /* Compact for text */
+        }
+
+        .bubble:hover {
+            transform: scale(1.1);
+            box-shadow: 
+                0 0 30px rgba(255,255,255,0.7), /* Enhanced shine on hover */
+                0 6px 16px rgba(0,0,0,0.3);
+        }
+
+        /* No separate correct/trap backgrounds - all same */
+
+        .bubble.popped {
+            animation: pop 0.4s ease-out forwards; /* Slightly longer pop for bigger bubbles */
+        }
+
+        /* Mark animations */
+        .checkmark {
+            position: absolute;
+            font-size: 40px;
+            color: #4CAF50;
+            animation: appear 0.5s ease-out forwards;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .cross {
+            position: absolute;
+            font-size: 40px;
+            color: #f44336;
+            animation: appear 0.5s ease-out forwards;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        @keyframes appear {
+            0% {
+                opacity: 0;
+                transform: scale(0) rotate(-180deg);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.2) rotate(0deg);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(1) rotate(0deg);
+            }
+        }
+
+        @keyframes floatUp {
+            0% {
+                bottom: -100px;
+                opacity: 0;
+                transform: translateX(0) rotate(0deg) scale(0.8); /* Start smaller for emergence */
+            }
+            10% {
+                opacity: 1;
+                transform: translateX(0) rotate(0deg) scale(1);
+            }
+            100% {
+                bottom: 100vh;
+                opacity: 0;
+                transform: translateX(var(--drift)) rotate(var(--wobble)); /* Variable drift and wobble for interest */
+            }
+        }
+
+        @keyframes pop {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.8); /* Bigger pop scale */
+                opacity: 0.8;
+            }
+            100% {
+                transform: scale(0);
+                opacity: 0;
+            }
+        }
+
+        /* Particle effect for pop (simple CSS particles) */
+        .particles {
+            position: absolute;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            width: 6px; /* Bigger particles for big bubbles */
+            height: 6px;
+            background: #fff;
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        /* Level progression visuals */
+        #levelIndicator {
+            position: absolute;
+            top: 60px;
+            left: 20px;
+            z-index: 10;
+            color: #333;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        /* Mobile-first topic selection overlay */
+        #topicOverlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom, rgba(255,255,255,0.95), rgba(255,255,255,0.85));
+            z-index: 30;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow-y: auto; /* allow scroll if content is tall */
+            padding: 24px 16px;
+        }
+        .overlay-card {
+            width: min(92vw, 520px);
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            padding: 20px;
+            max-height: 92vh; /* keep within viewport */
+            overflow-y: auto;
+            text-align: center;
+        }
+        .app-title { font-size: 22px; margin: 0 0 8px; color: #1b3b5a; font-weight: 800; }
+        .app-sub { font-size: 14px; margin: 0 0 16px; color: #356b8c; font-weight: 600; }
+        .topic-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+        .topic-btn {
+            padding: 12px;
+            border: 0;
+            border-radius: 12px;
+            background: #87CEEB;
+            color: #0f2d44;
+            font-weight: 700;
+            font-size: 16px;
+            box-shadow: 0 3px 0 #6db6d6;
+            transform: translateY(-1px);
+        }
+        .topic-btn:active { transform: translateY(0); box-shadow: 0 1px 0 #6db6d6; }
+        .summary { text-align: left; background: #f6fbff; border: 1px solid #dbeffc; padding: 12px; border-radius: 12px; margin: 10px 0; }
+        .summary h4 { margin: 0 0 6px; font-size: 16px; color: #0f2d44; }
+        .summary p { margin: 0 0 6px; font-size: 14px; color: #23465f; }
+        .summary ul { margin: 6px 0 0 18px; padding: 0; }
+        .summary li { font-size: 14px; color: #23465f; }
+    .start-btn { width: 100%; margin-top: 12px; padding: 12px; border: 0; border-radius: 12px; background: #ffcf54; color: #1c273a; font-weight: 800; font-size: 16px; box-shadow: 0 3px 0 #e5b93d; position: sticky; bottom: 0; }
+        .start-btn:disabled { opacity: 0.5; }
+    .qa-preview { background:#fff; border:1px solid #e6eef6; border-radius:12px; padding:10px; margin-top:10px; text-align:left; }
+    .qa-preview h5 { margin:0 0 6px; font-size:14px; color:#0f2d44; }
+    .qa-item { font-size:13px; color:#23465f; margin:4px 0; }
+    .qa-item strong { color:#0f2d44; }
+    .details { background:#f9fcff; border:1px solid #dbeffc; border-radius:12px; padding:12px; margin-top:10px; text-align:left; }
+    .details h5 { margin:8px 0 6px; font-size:14px; color:#0f2d44; }
+    .details p, .details li { font-size:13px; color:#23465f; }
+
+    /* How-to modal */
+    #howToModal { position:absolute; inset:0; background:rgba(0,0,0,0.4); z-index:40; display:none; align-items:center; justify-content:center; padding:16px; overflow-y:auto; }
+    .modal-card { width:min(92vw,520px); background:#ffffff; border-radius:16px; box-shadow:0 10px 24px rgba(0,0,0,0.25); padding:18px; text-align:left; max-height:92vh; overflow-y:auto; }
+    .modal-card h3 { margin:0 0 8px; font-size:18px; color:#1b3b5a; }
+    .modal-card p { margin:6px 0; font-size:14px; color:#23465f; }
+    .modal-list { margin:6px 0 0 18px; padding:0; color:#23465f; font-size:14px; }
+    .modal-actions { margin-top:12px; display:flex; gap:10px; justify-content:flex-end; }
+    .modal-btn { padding:10px 14px; border:0; border-radius:10px; background:#ffcf54; color:#1c273a; font-weight:800; }
+
+        /* Responsive for mobile - compact */
+        @media (max-width: 768px) {
+            .bubble {
+                width: 70px;
+                height: 70px;
+                font-size: 10px;
+                max-width: 60px;
+            }
+            #problem {
+                font-size: 18px;
+            }
+            #problem {
+                font-size: 16px;
+                max-width: 90%;
+            }
+            .checkmark, .cross {
+                font-size: 30px;
+            }
+        }
+
+        /* Subtle cloud-like background elements for more interest (static, low-perf) */
+        .cloud {
+            position: absolute;
+            background: rgba(255,255,255,0.8);
+            border-radius: 50px;
+            opacity: 0.7;
+            animation: driftCloud 20s linear infinite;
+        }
+
+        .cloud::before,
+        .cloud::after {
+            content: '';
+            position: absolute;
+            background: rgba(255,255,255,0.8);
+            border-radius: 50px;
+        }
+
+        .cloud::before {
+            width: 50px;
+            height: 50px;
+            top: -25px;
+            left: 10px;
+        }
+
+        .cloud::after {
+            width: 40px;
+            height: 40px;
+            top: -20px;
+            right: 10px;
+        }
+
+        @keyframes driftCloud {
+            0% { left: -100px; }
+            100% { left: 100vw; }
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <div id="topicOverlay">
+            <div class="overlay-card">
+                <h1 class="app-title">Aiplay</h1>
+                <p class="app-sub">Maths & AI Agents – Learn fast, then play</p>
+                <div class="topic-row">
+                    <button class="topic-btn" data-topic="maths">Math</button>
+                    <button class="topic-btn" data-topic="aiAgents">AI Agents</button>
+                </div>
+                <div class="summary" id="topicSummary" style="display:none">
+                    <h4 id="summaryTitle"></h4>
+                    <p id="summaryText"></p>
+                    <ul id="examplesList"></ul>
+                    <div class="qa-preview" id="qaPreview" style="display:none">
+                        <h5>Preview Q&A (first 3)</h5>
+                        <div id="qaItems"></div>
+                    </div>
+                    <div class="details" id="detailBox" style="display:none"></div>
+                </div>
+                <button id="startGameBtn" class="start-btn" disabled>Start Game</button>
+            </div>
+        </div>
+        <div id="problem"></div>
+    <div id="instructions">Tap (don’t swipe) the correct answer bubble.</div>
+        <canvas id="gameCanvas" width="100%" height="100%"></canvas> <!-- Canvas for potential future enhancements -->
+        
+        <!-- Static clouds for sky interest -->
+        <div class="cloud" style="width: 100px; height: 60px; top: 10%; animation-delay: 0s;"></div>
+        <div class="cloud" style="width: 80px; height: 50px; top: 20%; animation-delay: 5s;"></div>
+        <div class="cloud" style="width: 120px; height: 70px; top: 70%; animation-delay: 10s;"></div>
+    </div>
+
+    <!-- How to Play Modal for Bubble Game -->
+    <div id="howToModal">
+        <div class="modal-card">
+            <h3>How to Play</h3>
+            <p><strong>Game 1 – Bubble Pop</strong></p>
+            <ul class="modal-list">
+                <li>One question appears at top.</li>
+                <li>Tap the one correct bubble. Options are in fixed order.</li>
+                <li>Answer 3 questions to continue to Game 2.</li>
+            </ul>
+            <p><strong>Game 2 – Rocket Quiz</strong></p>
+            <ul class="modal-list">
+                <li>Pick the correct answer from 4 choices.</li>
+                <li>3 questions. Rocket reacts to your choice.</li>
+                <li>See your final scoreboard at the end.</li>
+            </ul>
+            <div class="modal-actions">
+                <button id="bubbleStartBtn" class="modal-btn">Start Bubble Game</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Preloaded topics with one-word options only
+                        const topics = {
+                            maths: {
+                                summary: 'Addition combines numbers to find a sum. Subtraction finds what remains (difference) after taking away. Below are concepts and examples aligned with the questions you\'ll play.',
+                                examples: ['Addition: 7+5', 'Subtraction: 15−6'],
+                                details: `
+                                    <h5>1) Addition</h5>
+                                    <p><strong>Definition:</strong> Combine numbers to get the <em>sum</em>. Symbol: <strong>+</strong>. The numbers added are <em>addends</em>.</p>
+                                    <p><strong>Use:</strong> Combine quantities. Example: items you have + items you get.</p>
+                                    <h5>2) Subtraction</h5>
+                                    <p><strong>Definition:</strong> Find the <em>difference</em> after taking away. Symbol: <strong>−</strong>. Start with a <em>minuend</em>, take a <em>subtrahend</em>.</p>
+                                    <p><strong>Use:</strong> What remains or how much more/less.</p>
+                                    <h5>Examples</h5>
+                                    <ul>
+                                        <li>7 + 5 = 12</li>
+                                        <li>15 − 6 = 9</li>
+                                    </ul>
+                                `,
+                                questions: [
+                                    { question: 'Addition symbol?', options: ['+','-','×','÷'], answer: '+', explanation: 'Addition uses +.' },
+                                    { question: 'Result of addition?', options: ['sum','diff','prod','quot'], answer: 'sum', explanation: 'Sum is the result.' },
+                                    { question: 'Subtraction symbol?', options: ['−','×','+','÷'], answer: '−', explanation: 'Subtraction uses −.' },
+                                    { question: 'Result of subtraction?', options: ['difference','sum','product','quotient'], answer: 'difference', explanation: 'Difference is the result.' },
+                                    { question: '7+5=?', options: ['11','12','13','14'], answer: '12', explanation: '7+5 equals 12.' },
+                                    { question: '15−6=?', options: ['7','8','9','10'], answer: '9', explanation: '15−6 equals 9.' }
+                                ]
+                            },
+                            aiAgents: {
+                                summary: 'An AI agent senses, decides, and acts to reach a goal. It uses <em>sensors</em> to perceive and <em>actuators</em> to perform actions. These points match the questions you\'ll play.',
+                                examples: ['Chatbot assistant', 'Self-driving car'],
+                                details: `
+                                    <h5>Define</h5>
+                                    <p>An AI agent senses its environment, makes decisions, and takes actions to achieve a goal.</p>
+                                    <ul>
+                                        <li><strong>Sensors:</strong> camera, microphone</li>
+                                        <li><strong>Actuators:</strong> robot arms, wheels</li>
+                                        <li><strong>Goal:</strong> desired outcome</li>
+                                    </ul>
+                                    <h5>Use</h5>
+                                    <ul>
+                                        <li>Online shopping recommendations</li>
+                                        <li>Chatbots and virtual assistants</li>
+                                        <li>Robotics and self-driving cars</li>
+                                    </ul>
+                                    <h5>Help</h5>
+                                    <ul>
+                                        <li>Personalized experiences</li>
+                                        <li>Safer automation</li>
+                                        <li>Faster problem-solving</li>
+                                    </ul>
+                                    <h5>Pros</h5>
+                                    <ul>
+                                        <li>Fast and efficient</li>
+                                        <li>Consistent performance</li>
+                                        <li>Can learn and improve</li>
+                                        <li>Versatile across industries</li>
+                                    </ul>
+                                    <h5>Cons</h5>
+                                    <ul>
+                                        <li>Can be expensive</li>
+                                        <li>Limited in new situations</li>
+                                        <li>Data-dependent</li>
+                                        <li>May replace human jobs</li>
+                                    </ul>
+                                    <h5>Examples</h5>
+                                    <ul>
+                                        <li>Simple reflex: Thermostat</li>
+                                        <li>Model-based: Robot vacuum</li>
+                                        <li>Goal-based: GPS navigation</li>
+                                        <li>Learning agent: Netflix recommendations</li>
+                                    </ul>
+                                    <h5>Real-Life Example: Self-driving car</h5>
+                                    <ul>
+                                        <li><strong>Sensors:</strong> cameras, LiDAR</li>
+                                        <li><strong>Actuators:</strong> steering, braking</li>
+                                        <li><strong>Decision-making:</strong> traffic analysis</li>
+                                        <li><strong>Goal:</strong> reach the destination safely</li>
+                                    </ul>
+                                `,
+                                            questions: [
+                                                { question: 'AI Agents sense tool?', options: ['Sensors','Dreams','Noise','Errors'], answer: 'Sensors', explanation: 'Agents perceive using sensors.' },
+                                                { question: 'AI Agents action tool?', options: ['Actuators','Pixels','Tweets','Notes'], answer: 'Actuators', explanation: 'Agents act using actuators.' },
+                                                { question: 'AI Agents main aim?', options: ['Goal','Chaos','Drift','Idle'], answer: 'Goal', explanation: 'Agents aim for a goal.' },
+                                                { question: 'AI Agents reflex example?', options: ['Thermostat','Spoon','Cloud','Printer'], answer: 'Thermostat', explanation: 'Thermostat is a reflex agent.' },
+                                                { question: 'AI Agents learn from?', options: ['Data','Magic','Luck','Noise'], answer: 'Data', explanation: 'Learning uses data.' },
+                                                { question: 'AI Agents example?', options: ['Chatbot','Stone','Paper','Spoon'], answer: 'Chatbot', explanation: 'Chatbot is an AI agent.' }
+                                            ]
+                            }
+                        };
+
+        const GAME1_COUNT = 3; // Bubble Pop asks first 3
+
+    let selectedTopic = null;
+    let qIndex = 0;
+    let score1 = 0;
+    let locked = false;
+    let bubbles = [];
+    let activeBubbles = 0;
+
+        // Topic overlay wiring
+        const overlay = document.getElementById('topicOverlay');
+    const startBtn = document.getElementById('startGameBtn');
+        const topicBtns = Array.from(document.querySelectorAll('.topic-btn'));
+        const summaryBox = document.getElementById('topicSummary');
+        const summaryTitle = document.getElementById('summaryTitle');
+        const summaryText = document.getElementById('summaryText');
+        const examplesList = document.getElementById('examplesList');
+    const qaPreview = document.getElementById('qaPreview');
+    const qaItems = document.getElementById('qaItems');
+    const detailBox = document.getElementById('detailBox');
+    const howTo = document.getElementById('howToModal');
+    const bubbleStartBtn = document.getElementById('bubbleStartBtn');
+
+        topicBtns.forEach(btn => btn.addEventListener('click', () => {
+          const key = btn.dataset.topic;
+          selectedTopic = key;
+          topicBtns.forEach(b => b.style.outline = '');
+          btn.style.outline = '3px solid #1b3b5a';
+          const t = topics[key];
+          summaryTitle.textContent = key === 'maths' ? 'Math' : 'AI Agents';
+          summaryText.textContent = t.summary;
+          examplesList.innerHTML = '';
+          t.examples.slice(0,2).forEach(e => {
+            const li = document.createElement('li');
+            li.textContent = e;
+            examplesList.appendChild(li);
+          });
+          summaryBox.style.display = 'block';
+                    // Q&A preview: show first 3 with their correct one-word answers
+                    qaItems.innerHTML = '';
+                    t.questions.slice(0,3).forEach((q, i) => {
+                        const div = document.createElement('div');
+                        div.className = 'qa-item';
+                        div.innerHTML = `<strong>Q${i+1}:</strong> ${q.question} — <strong>Ans:</strong> ${q.answer}`;
+                        qaItems.appendChild(div);
+                    });
+                                qaPreview.style.display = 'block';
+                                // Detailed structured section
+                                detailBox.innerHTML = t.details || '';
+                                detailBox.style.display = t.details ? 'block' : 'none';
+          startBtn.disabled = false;
+        }));
+
+                startBtn.addEventListener('click', () => {
+          if (!selectedTopic) return;
+          // Persist selection for Game 2
+          sessionStorage.setItem('aiplay_topic', selectedTopic);
+          sessionStorage.setItem('aiplay_game1Score', '0');
+          sessionStorage.setItem('aiplay_nextIndex', String(GAME1_COUNT));
+                    // Show how-to modal before starting
+                    howTo.style.display = 'flex';
+        });
+
+                bubbleStartBtn.addEventListener('click', () => {
+                    howTo.style.display = 'none';
+                    overlay.style.display = 'none';
+                    startBubbleQuiz();
+                });
+
+        function startBubbleQuiz() {
+          score1 = 0;
+          qIndex = 0;
+          nextQuestion();
+        }
+
+        function clearBubbles() {
+                    bubbles.forEach(b => b.remove());
+                    bubbles = [];
+                    activeBubbles = 0;
+        }
+
+        function nextQuestion() {
+          clearBubbles();
+          locked = false;
+          if (qIndex >= GAME1_COUNT) {
+            // Save and go to Rocket game
+            sessionStorage.setItem('aiplay_game1Score', String(score1));
+            sessionStorage.setItem('aiplay_nextIndex', String(GAME1_COUNT));
+            // small delay for smoothness
+            setTimeout(() => { window.location.href = 'game1.html'; }, 450);
+            return;
+          }
+          const t = topics[selectedTopic];
+          const q = t.questions[qIndex];
+          document.getElementById('problem').textContent = q.question;
+          spawnOptionBubbles(q);
+        }
+
+                function spawnOptionBubbles(q) {
+          const container = document.getElementById('gameContainer');
+          const positionsPct = [12, 36, 60, 84]; // fixed order: do not shuffle
+                    activeBubbles = 0;
+                    q.options.forEach((opt, i) => {
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble';
+            bubble.textContent = opt;
+            bubble.style.left = `calc(${positionsPct[i]}vw - 40px)`; // center approx for 80px bubble
+                        const duration = 14; // slower float speed
+            bubble.style.setProperty('--drift', '0px');
+            bubble.style.setProperty('--wobble', '0deg');
+            bubble.style.animation = `floatUp ${duration}s linear forwards`;
+            bubble.dataset.value = opt;
+            container.appendChild(bubble);
+            bubbles.push(bubble);
+                        activeBubbles++;
+            bubble.addEventListener('click', onBubbleClick);
+            bubble.addEventListener('touchstart', (e) => { e.preventDefault(); onBubbleClick({ currentTarget: bubble }); });
+                        // If bubble floats away and no answer chosen, count down and respawn set
+                        bubble.addEventListener('animationend', () => {
+                            // Remove if still present to avoid accumulation
+                            if (bubble.parentNode) bubble.remove();
+                            bubbles = bubbles.filter(b => b !== bubble);
+                            activeBubbles = Math.max(0, activeBubbles - 1);
+                            if (activeBubbles === 0 && !locked) {
+                                // Respawn same question after brief pause
+                                setTimeout(() => {
+                                    if (!locked) {
+                                        spawnOptionBubbles(q);
+                                    }
+                                }, 300);
+                            }
+                        });
+          });
+        }
+
+        function onBubbleClick(e) {
+          if (locked) return;
+          locked = true;
+          const bubble = e.currentTarget;
+          const val = bubble.dataset.value;
+          const t = topics[selectedTopic];
+          const q = t.questions[qIndex];
+          const correct = (val === q.answer);
+          // mark
+          const mark = document.createElement('div');
+          mark.textContent = correct ? '✓' : '✗';
+          mark.className = correct ? 'checkmark' : 'cross';
+          mark.style.left = (bubble.offsetLeft + 30) + 'px';
+          mark.style.top = (bubble.offsetTop + 30) + 'px';
+          document.getElementById('gameContainer').appendChild(mark);
+          bubble.classList.add('popped');
+          if (correct) { score1 += 1; }
+          setTimeout(() => {
+            mark.remove();
+                        // Clear any remaining bubbles of this question
+                        clearBubbles();
+            qIndex += 1;
+            nextQuestion();
+          }, 600);
+        }
+
+        // Initialize (overlay shown by default)
+        window.addEventListener('load', () => {
+          // Clear any previous session so topic selection is required
+          sessionStorage.removeItem('aiplay_topic');
+          sessionStorage.removeItem('aiplay_game1Score');
+          sessionStorage.removeItem('aiplay_nextIndex');
+        });
+    </script>
+</body>
+</html>
