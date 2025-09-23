@@ -27,22 +27,23 @@
             background: linear-gradient(to bottom, var(--dark-blue) 0%, var(--sky-blue) 100%);
             font-family: 'Nunito', sans-serif;
             color: var(--dark-blue);
+            overflow: hidden;
         }
         
         .game-container {
-            width: 100%;
-            max-width: 800px;
+            width: 100vw;
             height: 100vh;
-            max-height: 600px;
             position: relative;
-            border-radius: 20px;
+            border-radius: 0;
             overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            background: rgba(255, 255, 255, 0.3);
+            box-shadow: none;
+            background: transparent;
         }
         
         canvas {
             display: block;
+            width: 100%;
+            height: 100%;
             background: transparent;
             touch-action: none;
             -webkit-tap-highlight-color: transparent;
@@ -113,19 +114,49 @@
             to { opacity: 1; }
         }
 
-        @media (max-width: 600px) {
-            .game-container {
-                max-width: 95%;
-            }
+        @media (max-width: 768px) {
             .title {
-                font-size: 2em;
+                font-size: 1.8em;
+                margin-bottom: 15px;
             }
             .game-message {
-                font-size: 1.8em;
+                font-size: 1.5em;
+                margin-bottom: 15px;
             }
             .start-button, .restart-button {
-                font-size: 1.2em;
-                padding: 12px 24px;
+                font-size: 1.1em;
+                padding: 10px 20px;
+            }
+            .small-button {
+                font-size: 0.9em;
+                padding: 8px 14px;
+            }
+            .score-panel {
+                font-size: 1em;
+                padding: 8px 12px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .title {
+                font-size: 1.5em;
+                margin-bottom: 10px;
+            }
+            .game-message {
+                font-size: 1.3em;
+                margin-bottom: 10px;
+            }
+            .start-button, .restart-button {
+                font-size: 1em;
+                padding: 8px 16px;
+            }
+            .small-button {
+                font-size: 0.8em;
+                padding: 6px 12px;
+            }
+            .score-panel {
+                font-size: 0.9em;
+                padding: 6px 10px;
             }
         }
     .score-panel { color: var(--white); font-size: 1.1em; margin-top: 10px; background: rgba(0,0,0,0.2); padding: 10px 14px; border-radius: 10px; }
@@ -215,6 +246,7 @@
             resizeCanvas();
             window.addEventListener('resize', resizeCanvas);
             canvas.addEventListener('click', handleInput);
+            canvas.addEventListener('touchstart', handleTouchInput);
             startButton.addEventListener('click', startGame);
                         document.getElementById('playAgainBtn').addEventListener('click', () => {
                                 // Restart both games quickly: go back to game2 topic overlay
@@ -288,10 +320,14 @@
 
         function resizeCanvas() {
             const container = document.querySelector('.game-container');
-            canvas.width = container.clientWidth;
-            canvas.height = container.clientHeight;
-            rocket.x = canvas.width / 2;
-            rocket.y = canvas.height / 2;
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = container.clientWidth * dpr;
+            canvas.height = container.clientHeight * dpr;
+            canvas.style.width = container.clientWidth + 'px';
+            canvas.style.height = container.clientHeight + 'px';
+            ctx.scale(dpr, dpr);
+            rocket.x = container.clientWidth / 2;
+            rocket.y = container.clientHeight / 2;
         }
 
         // Main game loop
@@ -328,18 +364,39 @@
 
         function handleInput(event) {
             if (gameState !== 'playing') return;
+            processInput(event.clientX, event.clientY);
+        }
 
+        function handleTouchInput(event) {
+            if (gameState !== 'playing') return;
+            event.preventDefault();
+            const touch = event.touches[0];
+            processInput(touch.clientX, touch.clientY);
+        }
+
+        function processInput(clientX, clientY) {
             const rect = canvas.getBoundingClientRect();
-            const clickX = event.clientX - rect.left;
-            const clickY = event.clientY - rect.top;
-
-            const boxY = canvas.height - answerBoxHeight - 40;
-            const startX = (canvas.width - (answerBoxWidth * 4 + answerBoxMargin * 3)) / 2;
+            const clickX = clientX - rect.left;
+            const clickY = clientY - rect.top;
+            
+            const container = document.querySelector('.game-container');
+            const canvasWidth = container.clientWidth;
+            const canvasHeight = container.clientHeight;
+            
+            // Mobile-responsive hit detection
+            const isMobile = canvasWidth < 768;
+            const boxWidth = isMobile ? Math.min(80, canvasWidth / 5) : answerBoxWidth;
+            const boxHeight = isMobile ? Math.min(50, canvasHeight / 12) : answerBoxHeight;
+            const margin = isMobile ? 8 : answerBoxMargin;
+            
+            const totalWidth = (boxWidth * 4) + (margin * 3);
+            const startX = (canvasWidth - totalWidth) / 2;
+            const boxY = canvasHeight - boxHeight - (isMobile ? 20 : 40);
 
             answers.forEach((ans, index) => {
-                const boxX = startX + index * (answerBoxWidth + answerBoxMargin);
-                if (clickX > boxX && clickX < boxX + answerBoxWidth &&
-                    clickY > boxY && clickY < boxY + answerBoxHeight) {
+                const boxX = startX + index * (boxWidth + margin);
+                if (clickX > boxX && clickX < boxX + boxWidth &&
+                    clickY > boxY && clickY < boxY + boxHeight) {
                     
                     if (String(ans) === String(question.answer)) {
                         handleCorrectAnswer();
@@ -513,42 +570,91 @@
 
 
         function drawAnswers() {
-            const boxY = canvas.height - answerBoxHeight - 40;
-            const startX = (canvas.width - (answerBoxWidth * 4 + answerBoxMargin * 3)) / 2;
+            const container = document.querySelector('.game-container');
+            const canvasWidth = container.clientWidth;
+            const canvasHeight = container.clientHeight;
+            
+            // Mobile-responsive box sizing
+            const isMobile = canvasWidth < 768;
+            const boxWidth = isMobile ? Math.min(80, canvasWidth / 5) : answerBoxWidth;
+            const boxHeight = isMobile ? Math.min(50, canvasHeight / 12) : answerBoxHeight;
+            const margin = isMobile ? 8 : answerBoxMargin;
+            const fontSize = isMobile ? Math.max(12, boxWidth / 6) : 24;
+            
+            const totalWidth = (boxWidth * 4) + (margin * 3);
+            const startX = (canvasWidth - totalWidth) / 2;
+            const boxY = canvasHeight - boxHeight - (isMobile ? 20 : 40);
             
             answers.forEach((ans, index) => {
-                const boxX = startX + index * (answerBoxWidth + answerBoxMargin);
+                const boxX = startX + index * (boxWidth + margin);
                 
                 // Draw box
                 ctx.fillStyle = gray;
                 ctx.beginPath();
-                ctx.roundRect(boxX, boxY, answerBoxWidth, answerBoxHeight, 10);
+                ctx.roundRect(boxX, boxY, boxWidth, boxHeight, isMobile ? 6 : 10);
                 ctx.fill();
-                ctx.lineWidth = 2;
+                ctx.lineWidth = isMobile ? 1 : 2;
                 ctx.strokeStyle = 'rgba(0,0,0,0.2)';
                 ctx.stroke();
                 
-                // Draw text
+                // Draw text with responsive font
                 ctx.fillStyle = darkBlue;
-                ctx.font = '24px "Nunito"';
+                ctx.font = `${fontSize}px "Nunito"`;
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                ctx.fillText(ans, boxX + answerBoxWidth / 2, boxY + answerBoxHeight / 2);
+                
+                // Handle long text on mobile
+                const text = String(ans);
+                if (isMobile && text.length > 8) {
+                    const words = text.split(' ');
+                    if (words.length > 1) {
+                        ctx.font = `${fontSize * 0.8}px "Nunito"`;
+                        ctx.fillText(words[0], boxX + boxWidth / 2, boxY + boxHeight / 2 - fontSize / 4);
+                        ctx.fillText(words.slice(1).join(' '), boxX + boxWidth / 2, boxY + boxHeight / 2 + fontSize / 4);
+                    } else {
+                        ctx.font = `${fontSize * 0.9}px "Nunito"`;
+                        ctx.fillText(text, boxX + boxWidth / 2, boxY + boxHeight / 2);
+                    }
+                } else {
+                    ctx.fillText(text, boxX + boxWidth / 2, boxY + boxHeight / 2);
+                }
             });
         }
         
         function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const container = document.querySelector('.game-container');
+            const canvasWidth = container.clientWidth;
+            const canvasHeight = container.clientHeight;
+            
+            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
             if (gameState !== 'start') {
                 drawRocket(rocket.x, rocket.y, rocket.w, rocket.h, rocket.withFire);
 
                 if (gameState === 'playing' || gameState === 'crashing') {
-                    // Draw question text
-                    ctx.font = '40px "Poppins"';
+                    // Draw question text with mobile responsiveness
+                    const isMobile = canvasWidth < 768;
+                    const questionFontSize = isMobile ? Math.max(16, canvasWidth / 25) : 40;
+                    const questionY = isMobile ? Math.max(50, canvasHeight / 15) : 80;
+                    
+                    ctx.font = `${questionFontSize}px "Poppins"`;
                     ctx.fillStyle = white;
                     ctx.textAlign = 'center';
-                    ctx.fillText(question.text, canvas.width / 2, 80);
+                    ctx.textBaseline = 'top';
+                    
+                    // Handle long questions on mobile
+                    const text = question.text;
+                    if (isMobile && text.length > 20) {
+                        const words = text.split(' ');
+                        const mid = Math.ceil(words.length / 2);
+                        const line1 = words.slice(0, mid).join(' ');
+                        const line2 = words.slice(mid).join(' ');
+                        
+                        ctx.fillText(line1, canvasWidth / 2, questionY);
+                        ctx.fillText(line2, canvasWidth / 2, questionY + questionFontSize + 5);
+                    } else {
+                        ctx.fillText(text, canvasWidth / 2, questionY);
+                    }
 
                     drawAnswers();
                 }
