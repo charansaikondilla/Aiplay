@@ -236,56 +236,76 @@
         const answerBoxMargin = 20;
 
         // Enhanced Game Sounds using Web Audio API
+        let rocketAudioContext = null;
+        let rocketAudioInitialized = false;
+
+        function initRocketAudio() {
+            if (!rocketAudioInitialized) {
+                try {
+                    rocketAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    if (rocketAudioContext.state === 'suspended') {
+                        rocketAudioContext.resume();
+                    }
+                    rocketAudioInitialized = true;
+                    console.log('Rocket audio initialized');
+                } catch (e) {
+                    console.log('Rocket audio not supported:', e);
+                }
+            }
+        }
+
         function playRocketLaunch() {
+            if (!rocketAudioContext || rocketAudioContext.state !== 'running') return;
+            
             try {
-                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                const oscillator = audioContext.createOscillator();
-                const gainNode = audioContext.createGain();
-                const filter = audioContext.createBiquadFilter();
+                const oscillator = rocketAudioContext.createOscillator();
+                const gainNode = rocketAudioContext.createGain();
+                const filter = rocketAudioContext.createBiquadFilter();
                 
                 oscillator.connect(filter);
                 filter.connect(gainNode);
-                gainNode.connect(audioContext.destination);
+                gainNode.connect(rocketAudioContext.destination);
                 
                 // Rocket launch sound: low rumble building up
-                oscillator.frequency.setValueAtTime(80, audioContext.currentTime);
-                oscillator.frequency.exponentialRampToValueAtTime(400, audioContext.currentTime + 0.5);
-                oscillator.frequency.exponentialRampToValueAtTime(800, audioContext.currentTime + 1.0);
+                oscillator.type = 'sawtooth';
+                oscillator.frequency.setValueAtTime(80, rocketAudioContext.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(400, rocketAudioContext.currentTime + 0.5);
+                oscillator.frequency.exponentialRampToValueAtTime(800, rocketAudioContext.currentTime + 1.0);
                 
                 filter.type = 'lowpass';
-                filter.frequency.setValueAtTime(2000, audioContext.currentTime);
-                filter.frequency.exponentialRampToValueAtTime(8000, audioContext.currentTime + 1.0);
+                filter.frequency.setValueAtTime(2000, rocketAudioContext.currentTime);
+                filter.frequency.exponentialRampToValueAtTime(8000, rocketAudioContext.currentTime + 1.0);
                 
-                gainNode.gain.setValueAtTime(0.4, audioContext.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1.2);
+                gainNode.gain.setValueAtTime(0.4, rocketAudioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, rocketAudioContext.currentTime + 1.2);
                 
-                oscillator.start(audioContext.currentTime);
-                oscillator.stop(audioContext.currentTime + 1.2);
+                oscillator.start(rocketAudioContext.currentTime);
+                oscillator.stop(rocketAudioContext.currentTime + 1.2);
             } catch (e) {
                 console.log('Audio not supported');
             }
         }
         
         function playCorrectChime() {
+            if (!rocketAudioContext || rocketAudioContext.state !== 'running') return;
+            
             try {
-                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                
                 // Play a pleasant ascending chime
                 [523, 659, 784].forEach((freq, i) => {
-                    const oscillator = audioContext.createOscillator();
-                    const gainNode = audioContext.createGain();
+                    const oscillator = rocketAudioContext.createOscillator();
+                    const gainNode = rocketAudioContext.createGain();
                     
                     oscillator.connect(gainNode);
-                    gainNode.connect(audioContext.destination);
+                    gainNode.connect(rocketAudioContext.destination);
                     
-                    oscillator.frequency.setValueAtTime(freq, audioContext.currentTime + i * 0.1);
+                    oscillator.frequency.setValueAtTime(freq, rocketAudioContext.currentTime + i * 0.1);
                     oscillator.type = 'sine';
                     
-                    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime + i * 0.1);
-                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + i * 0.1 + 0.3);
+                    gainNode.gain.setValueAtTime(0.3, rocketAudioContext.currentTime + i * 0.1);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, rocketAudioContext.currentTime + i * 0.1 + 0.3);
                     
-                    oscillator.start(audioContext.currentTime + i * 0.1);
-                    oscillator.stop(audioContext.currentTime + i * 0.1 + 0.3);
+                    oscillator.start(rocketAudioContext.currentTime + i * 0.1);
+                    oscillator.stop(rocketAudioContext.currentTime + i * 0.1 + 0.3);
                 });
             } catch (e) {
                 console.log('Audio not supported');
@@ -293,36 +313,37 @@
         }
         
         function playWrongBuzz() {
+            if (!rocketAudioContext || rocketAudioContext.state !== 'running') return;
+            
             try {
-                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                const oscillator = audioContext.createOscillator();
-                const gainNode = audioContext.createGain();
+                const oscillator = rocketAudioContext.createOscillator();
+                const gainNode = rocketAudioContext.createGain();
                 
                 oscillator.connect(gainNode);
-                gainNode.connect(audioContext.destination);
+                gainNode.connect(rocketAudioContext.destination);
                 
                 // Descending buzz for wrong answer
-                oscillator.frequency.setValueAtTime(300, audioContext.currentTime);
-                oscillator.frequency.exponentialRampToValueAtTime(150, audioContext.currentTime + 0.4);
+                oscillator.frequency.setValueAtTime(300, rocketAudioContext.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(150, rocketAudioContext.currentTime + 0.4);
                 oscillator.type = 'sawtooth';
                 
-                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
+                gainNode.gain.setValueAtTime(0.3, rocketAudioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, rocketAudioContext.currentTime + 0.4);
                 
-                oscillator.start(audioContext.currentTime);
-                oscillator.stop(audioContext.currentTime + 0.4);
+                oscillator.start(rocketAudioContext.currentTime);
+                oscillator.stop(rocketAudioContext.currentTime + 0.4);
             } catch (e) {
-                console.log('Audio not supported');
+                console.log('Wrong buzz sound failed:', e);
             }
         }
         
         function playCrashThud() {
+            if (!rocketAudioContext || rocketAudioContext.state !== 'running') return;
+            
             try {
-                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                
                 // Create crash sound with noise and low frequency
-                const bufferSize = audioContext.sampleRate * 0.5; // 0.5 seconds
-                const buffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+                const bufferSize = rocketAudioContext.sampleRate * 0.5; // 0.5 seconds
+                const buffer = rocketAudioContext.createBuffer(1, bufferSize, rocketAudioContext.sampleRate);
                 const data = buffer.getChannelData(0);
                 
                 // Generate noise with envelope
@@ -331,24 +352,24 @@
                     data[i] = (Math.random() * 2 - 1) * envelope * 0.3;
                 }
                 
-                const source = audioContext.createBufferSource();
-                const filter = audioContext.createBiquadFilter();
-                const gainNode = audioContext.createGain();
+                const source = rocketAudioContext.createBufferSource();
+                const filter = rocketAudioContext.createBiquadFilter();
+                const gainNode = rocketAudioContext.createGain();
                 
                 source.buffer = buffer;
                 source.connect(filter);
                 filter.connect(gainNode);
-                gainNode.connect(audioContext.destination);
+                gainNode.connect(rocketAudioContext.destination);
                 
                 filter.type = 'lowpass';
-                filter.frequency.setValueAtTime(800, audioContext.currentTime);
+                filter.frequency.setValueAtTime(800, rocketAudioContext.currentTime);
                 
-                gainNode.gain.setValueAtTime(0.4, audioContext.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+                gainNode.gain.setValueAtTime(0.4, rocketAudioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, rocketAudioContext.currentTime + 0.5);
                 
-                source.start(audioContext.currentTime);
+                source.start(rocketAudioContext.currentTime);
             } catch (e) {
-                console.log('Audio not supported');
+                console.log('Crash sound failed:', e);
             }
         }
 
@@ -367,6 +388,7 @@
                                 window.location.href = 'game2.html';
                         });
                         document.getElementById('rocketStartBtn').addEventListener('click', () => {
+                            initRocketAudio(); // Initialize audio on user interaction
                             document.getElementById('rocketHowTo').style.display = 'none';
                             startGame();
                         });
@@ -401,6 +423,20 @@
                                                                 { question: 'AI Agents reflex example?', options: ['Thermostat','Spoon','Cloud','Printer'], answer: 'Thermostat' },
                                                                 { question: 'AI Agents learn from?', options: ['Data','Magic','Luck','Noise'], answer: 'Data' },
                                                                 { question: 'AI Agents example?', options: ['Chatbot','Stone','Paper','Spoon'], answer: 'Chatbot' }
+                                            ]
+                                        },
+                                        sql: {
+                                            questions: [
+                                                { question: 'Which SQL command creates a new table?', options: ['INSERT','CREATE','SELECT','UPDATE'], answer: 'CREATE' },
+                                                { question: 'Which SQL command retrieves data?', options: ['SELECT','UPDATE','DELETE','DROP'], answer: 'SELECT' },
+                                                { question: 'Command to clear all rows but keep table?', options: ['DELETE','DROP','TRUNCATE','ALTER'], answer: 'TRUNCATE' },
+                                                { question: 'Which command changes existing data?', options: ['INSERT','UPDATE','SELECT','GRANT'], answer: 'UPDATE' },
+                                                { question: 'Command to undo transaction changes?', options: ['COMMIT','ROLLBACK','SAVEPOINT','REVOKE'], answer: 'ROLLBACK' },
+                                                { question: 'SQL clause to filter data?', options: ['GROUP BY','WHERE','ORDER BY','HAVING'], answer: 'WHERE' },
+                                                { question: 'Keyword to sort results?', options: ['GROUP BY','ORDER BY','SORT','ARRANGE'], answer: 'ORDER BY' },
+                                                { question: 'JOIN that returns only matches?', options: ['LEFT JOIN','RIGHT JOIN','INNER JOIN','FULL JOIN'], answer: 'INNER JOIN' },
+                                                { question: 'Command to remove entire table?', options: ['DELETE','DROP','TRUNCATE','REVOKE'], answer: 'DROP' },
+                                                { question: 'Command to give user permissions?', options: ['INSERT','GRANT','REVOKE','SAVEPOINT'], answer: 'GRANT' }
                                             ]
                                         }
                                     };
@@ -597,22 +633,11 @@
         }
 
         function endGame() {
-            // Compute totals
-            totalScore = game1Score + game2Score;
-            gameState = 'gameOver';
-            showEndMessage('Scoreboard');
-            const panel = document.getElementById('scorePanel');
-            panel.style.display = 'block';
-            panel.innerHTML = `
-                <div><strong>Game 1</strong>: ${game1Score}/3</div>
-                <div><strong>Game 2</strong>: ${game2Score}/3</div>
-                <div style="margin-top:4px;"><strong>Total</strong>: ${totalScore}/6</div>
-            `;
-            document.getElementById('endButtons').style.display = 'flex';
-            // Clear session so a fresh run starts from topic selection
-            sessionStorage.removeItem('aiplay_topic');
-            sessionStorage.removeItem('aiplay_game1Score');
-            sessionStorage.removeItem('aiplay_nextIndex');
+            // Save Rocket game score for next game
+            sessionStorage.setItem('aiplay_game2Score', String(game2Score));
+            
+            // Navigate to Game 3 (Fishing)
+            window.location.href = 'game3.html';
         }
 
         // Drawing functions

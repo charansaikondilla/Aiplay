@@ -218,7 +218,24 @@
         }
         .app-title { font-size: 22px; margin: 0 0 8px; color: #1b3b5a; font-weight: 800; }
         .app-sub { font-size: 14px; margin: 0 0 16px; color: #356b8c; font-weight: 600; }
-        .topic-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+        .topic-grid { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr 1fr; /* Default to 3 columns for SQL support */
+            gap: 10px; 
+            margin-bottom: 14px; 
+        }
+        
+        @media (max-width: 700px) {
+            .topic-grid {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+            
+            .topic-btn {
+                padding: 12px 20px;
+                font-size: 16px;
+            }
+        }
         .topic-btn {
             padding: 12px;
             border: 0;
@@ -317,10 +334,11 @@
         <div id="topicOverlay">
             <div class="overlay-card">
                 <h1 class="app-title">Aiplay</h1>
-                <p class="app-sub">Maths & AI Agents – Learn fast, then play</p>
-                <div class="topic-row">
+                <p class="app-sub">Math, AI Agents & SQL – Learn fast, then play</p>
+                <div class="topic-grid">
                     <button class="topic-btn" data-topic="maths">Math</button>
                     <button class="topic-btn" data-topic="aiAgents">AI Agents</button>
+                    <button class="topic-btn" data-topic="sql">SQL</button>
                 </div>
                 <div class="summary" id="topicSummary" style="display:none">
                     <h4 id="summaryTitle"></h4>
@@ -455,6 +473,61 @@
                                                 { question: 'AI Agents learn from?', options: ['Data','Magic','Luck','Noise'], answer: 'Data', explanation: 'Learning uses data.' },
                                                 { question: 'AI Agents example?', options: ['Chatbot','Stone','Paper','Spoon'], answer: 'Chatbot', explanation: 'Chatbot is an AI agent.' }
                                             ]
+                            },
+                            sql: {
+                                summary: 'SQL (Structured Query Language) is used to communicate with databases. It helps create, manage, and retrieve data from relational databases through various commands.',
+                                examples: ['CREATE TABLE Students', 'SELECT * FROM Users', 'UPDATE Records SET Status'],
+                                details: `
+                                    <h5>1. Definition</h5>
+                                    <p>SQL (Structured Query Language) is a language used to communicate with databases. It helps us to create, manage, insert, update, delete, and retrieve data from relational databases.</p>
+                                    
+                                    <h5>2. SQL Commands</h5>
+                                    <p><strong>DDL (Data Definition Language):</strong> CREATE, ALTER, DROP, TRUNCATE</p>
+                                    <p><strong>DML (Data Manipulation Language):</strong> INSERT, UPDATE, DELETE</p>
+                                    <p><strong>DQL (Data Query Language):</strong> SELECT</p>
+                                    <p><strong>DCL (Data Control Language):</strong> GRANT, REVOKE</p>
+                                    <p><strong>TCL (Transaction Control Language):</strong> COMMIT, ROLLBACK, SAVEPOINT</p>
+                                    
+                                    <h5>3. Common Uses</h5>
+                                    <ul>
+                                        <li><strong>CREATE:</strong> Make new databases/tables</li>
+                                        <li><strong>INSERT:</strong> Add new data into tables</li>
+                                        <li><strong>UPDATE:</strong> Change existing data</li>
+                                        <li><strong>DELETE:</strong> Remove unwanted data</li>
+                                        <li><strong>SELECT:</strong> Retrieve specific data</li>
+                                        <li><strong>JOIN:</strong> Combine data from multiple tables</li>
+                                    </ul>
+                                    
+                                    <h5>4. Example Code</h5>
+                                    <pre style="background: #f5f5f5; padding: 10px; border-radius: 5px; font-size: 12px;">
+-- Create a table
+CREATE TABLE Students (
+  StudentID INT PRIMARY KEY,
+  Name VARCHAR(50),
+  Age INT,
+  Grade CHAR(2)
+);
+
+-- Insert data
+INSERT INTO Students (StudentID, Name, Age, Grade)
+VALUES (1, 'Alice', 20, 'A');
+
+-- Select data
+SELECT Name, Age FROM Students WHERE Grade = 'A';
+                                    </pre>
+                                `,
+                                questions: [
+                                    { question: 'Which SQL command is used to create a new table?', options: ['INSERT','CREATE','SELECT','UPDATE'], answer: 'CREATE', explanation: 'CREATE is used to make a new table or database.' },
+                                    { question: 'Which SQL command retrieves data from a table?', options: ['SELECT','UPDATE','DELETE','DROP'], answer: 'SELECT', explanation: 'SELECT is the command for fetching (reading) data.' },
+                                    { question: 'Which command removes all rows but keeps the table structure?', options: ['DELETE','DROP','TRUNCATE','ALTER'], answer: 'TRUNCATE', explanation: 'TRUNCATE clears all records but keeps the table ready for new data.' },
+                                    { question: 'Which command is used to change data inside a table?', options: ['INSERT','UPDATE','SELECT','GRANT'], answer: 'UPDATE', explanation: 'UPDATE modifies existing data in the table.' },
+                                    { question: 'Which SQL command undoes changes in a transaction?', options: ['COMMIT','ROLLBACK','SAVEPOINT','REVOKE'], answer: 'ROLLBACK', explanation: 'ROLLBACK cancels the changes and returns the database to its previous state.' },
+                                    { question: 'Which SQL clause is used to filter data?', options: ['GROUP BY','WHERE','ORDER BY','HAVING'], answer: 'WHERE', explanation: 'WHERE is used to apply conditions and filter rows.' },
+                                    { question: 'Which SQL keyword is used to arrange results in ascending or descending order?', options: ['GROUP BY','ORDER BY','SORT','ARRANGE'], answer: 'ORDER BY', explanation: 'ORDER BY arranges data either in ascending (ASC) or descending (DESC) order.' },
+                                    { question: 'Which JOIN returns only the matching rows from both tables?', options: ['LEFT JOIN','RIGHT JOIN','INNER JOIN','FULL JOIN'], answer: 'INNER JOIN', explanation: 'INNER JOIN shows only rows that exist in both tables.' },
+                                    { question: 'Which command removes the entire table including its structure?', options: ['DELETE','DROP','TRUNCATE','REVOKE'], answer: 'DROP', explanation: 'DROP permanently deletes the table and its data.' },
+                                    { question: 'Which SQL command is used to give a user permission to access data?', options: ['INSERT','GRANT','REVOKE','SAVEPOINT'], answer: 'GRANT', explanation: 'GRANT is used to give privileges to users.' }
+                                ]
                             }
                         };
 
@@ -513,6 +586,7 @@
 
                 startBtn.addEventListener('click', () => {
           if (!selectedTopic) return;
+          initAudio(); // Initialize audio on first user interaction
           // Persist selection for Game 2
           sessionStorage.setItem('aiplay_topic', selectedTopic);
           sessionStorage.setItem('aiplay_game1Score', '0');
@@ -522,6 +596,7 @@
         });
 
                 bubbleStartBtn.addEventListener('click', () => {
+                    initAudio(); // Initialize audio on first user interaction
                     howTo.style.display = 'none';
                     overlay.style.display = 'none';
                     startBubbleQuiz();
@@ -594,60 +669,96 @@
         }
 
         // Game sounds
-        function playBubblePop() {
-            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
-            
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
-            
-            oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
-            oscillator.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 0.1);
-            
-            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
-            
-            oscillator.start(audioContext.currentTime);
-            oscillator.stop(audioContext.currentTime + 0.1);
+        // Global audio context - initialize once
+        let audioContext = null;
+        let audioInitialized = false;
+
+        function initAudio() {
+            if (!audioInitialized) {
+                try {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    if (audioContext.state === 'suspended') {
+                        audioContext.resume();
+                    }
+                    audioInitialized = true;
+                    console.log('Audio initialized successfully');
+                } catch (e) {
+                    console.log('Audio not supported:', e);
+                }
+            }
         }
-        
+
+        function playBubblePop() {
+            if (!audioContext || audioContext.state !== 'running') return;
+            
+            try {
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 0.15);
+                
+                gainNode.gain.setValueAtTime(0.4, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.15);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.15);
+            } catch (e) {
+                console.log('Bubble pop sound failed:', e);
+            }
+        }
+
         function playCorrectSound() {
-            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
+            if (!audioContext || audioContext.state !== 'running') return;
             
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
-            
-            oscillator.frequency.setValueAtTime(523, audioContext.currentTime); // C5
-            oscillator.frequency.setValueAtTime(659, audioContext.currentTime + 0.1); // E5
-            oscillator.frequency.setValueAtTime(784, audioContext.currentTime + 0.2); // G5
-            
-            gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
-            
-            oscillator.start(audioContext.currentTime);
-            oscillator.stop(audioContext.currentTime + 0.3);
+            try {
+                // Play a happy ascending melody
+                const notes = [523, 659, 784]; // C5, E5, G5
+                notes.forEach((freq, i) => {
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    oscillator.type = 'sine';
+                    
+                    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime + i * 0.1);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + i * 0.1 + 0.3);
+                    
+                    oscillator.start(audioContext.currentTime + i * 0.1);
+                    oscillator.stop(audioContext.currentTime + i * 0.1 + 0.3);
+                });
+            } catch (e) {
+                console.log('Correct sound failed:', e);
+            }
         }
         
         function playWrongSound() {
-            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
+            if (!audioContext || audioContext.state !== 'running') return;
             
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
-            
-            oscillator.frequency.setValueAtTime(300, audioContext.currentTime);
-            oscillator.frequency.setValueAtTime(250, audioContext.currentTime + 0.1);
-            oscillator.frequency.setValueAtTime(200, audioContext.currentTime + 0.2);
-            
-            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
-            
-            oscillator.start(audioContext.currentTime);
-            oscillator.stop(audioContext.currentTime + 0.3);
+            try {
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.type = 'sawtooth';
+                oscillator.frequency.setValueAtTime(200, audioContext.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(100, audioContext.currentTime + 0.5);
+                
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.5);
+            } catch (e) {
+                console.log('Wrong sound failed:', e);
+            }
         }
 
         function onBubbleClick(e) {

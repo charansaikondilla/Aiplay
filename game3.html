@@ -1,0 +1,1391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aiplay – Fishing Quiz</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@700&family=Nunito:wght@400;700&display=swap');
+        
+        :root {
+            --sky-blue: #87CEEB;
+            --dark-blue: #1c273a;
+            --water-blue: #4169E1;
+            --water-light: #1E90FF;
+            --water-dark: #191970;
+            --correct-green: #4CAF50;
+            --correct-blue: #2196F3;
+            --wrong-red: #F44336;
+            --accent-yellow: #ffcf54;
+            --white: #ffffff;
+            --gray: #cccccc;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, var(--sky-blue), var(--water-light));
+            font-family: 'Nunito', sans-serif;
+            color: var(--dark-blue);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+            z-index: 20;
+        }
+        
+        .game-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.8em;
+            font-weight: 700;
+            color: var(--dark-blue);
+            margin: 0;
+        }
+
+        .game-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .score-display {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: var(--dark-blue);
+            background: rgba(255, 255, 255, 0.7);
+            padding: 8px 16px;
+            border-radius: 12px;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            min-width: 80px;
+            text-align: center;
+        }
+
+        .question-display {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: var(--dark-blue);
+            background: rgba(255, 255, 255, 0.8);
+            padding: 10px 16px;
+            border-radius: 12px;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            max-width: 400px;
+            text-align: center;
+        }
+        
+        .game-container {
+            flex: 1;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+        
+        canvas {
+            border: 3px solid rgba(255, 255, 255, 0.8);
+            border-radius: 16px;
+            cursor: grab;
+            max-width: calc(100vw - 40px);
+            max-height: calc(100vh - 140px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+        
+        canvas:active {
+            cursor: grabbing;
+        }
+        
+        .ui-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            pointer-events: none;
+            z-index: 10;
+        }
+        
+        .start-button, .restart-button, .end-button {
+            padding: 15px 30px;
+            font-size: 1.4em;
+            font-weight: 700;
+            color: var(--dark-blue);
+            background-color: var(--accent-yellow);
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 5px 0 #e5b93d;
+            transform: translateY(-2px);
+            transition: all 0.2s ease-in-out;
+            pointer-events: auto;
+            cursor: pointer;
+            margin: 10px;
+        }
+        
+        .start-button:hover, .restart-button:hover, .end-button:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 7px 0 #e5b93d;
+        }
+
+        .start-button:active, .restart-button:active, .end-button:active {
+            transform: translateY(0);
+            box-shadow: 0 3px 0 #e5b93d;
+        }
+
+        .feedback-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 15;
+            pointer-events: none;
+        }
+
+        .feedback-text {
+            font-size: 2.5em;
+            font-weight: 700;
+            font-family: 'Poppins', sans-serif;
+            text-align: center;
+            padding: 16px 24px;
+            border-radius: 16px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            animation: feedbackPop 2s ease-out forwards;
+            border: 3px solid;
+        }
+
+        .feedback-text.success {
+            color: var(--correct-green);
+            background: rgba(76, 175, 80, 0.1);
+            border-color: var(--correct-green);
+        }
+
+        .feedback-text.error {
+            color: var(--wrong-red);
+            background: rgba(244, 67, 54, 0.1);
+            border-color: var(--wrong-red);
+        }
+
+        @keyframes feedbackPop {
+            0% { transform: scale(0.5) translate(-50%, -50%); opacity: 0; }
+            20% { transform: scale(1.2) translate(-50%, -50%); opacity: 1; }
+            80% { transform: scale(1) translate(-50%, -50%); opacity: 1; }
+            100% { transform: scale(1) translate(-50%, -50%); opacity: 0; }
+        }
+
+        .instructions {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--dark-blue);
+            text-align: center;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            z-index: 10;
+        }
+
+        .fish-guide {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 12px 16px;
+            border-radius: 12px;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            z-index: 10;
+        }
+
+        .fish-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 4px 0;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--dark-blue);
+        }
+
+        .fish-icon {
+            width: 20px;
+            height: 12px;
+            border-radius: 6px;
+            border: 2px solid rgba(255, 255, 255, 0.8);
+        }
+
+        .fish-icon.correct { background: var(--correct-green); }
+        .fish-icon.correct-blue { background: var(--correct-blue); }
+        .fish-icon.wrong { background: var(--wrong-red); }
+
+        .score-panel {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 16px;
+            text-align: center;
+            border: 3px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            pointer-events: auto;
+        }
+
+        .score-panel h2 {
+            margin: 0 0 16px;
+            font-family: 'Poppins', sans-serif;
+            color: var(--dark-blue);
+        }
+
+        .score-breakdown {
+            margin: 16px 0;
+            font-size: 1.1em;
+            color: var(--dark-blue);
+        }
+
+        .button-row {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 16px;
+        }
+
+        .small-button {
+            font-size: 1em;
+            padding: 10px 16px;
+        }
+
+        /* Mobile optimizations */
+        @media (max-width: 768px) {
+            .game-header {
+                flex-direction: column;
+                gap: 10px;
+                padding: 12px 16px;
+            }
+
+            .game-title {
+                font-size: 1.4em;
+            }
+
+            .score-display, .question-display {
+                font-size: 1em;
+                padding: 6px 12px;
+            }
+
+            .question-display {
+                max-width: 280px;
+            }
+
+            canvas {
+                max-width: calc(100vw - 20px);
+                max-height: calc(100vh - 180px);
+            }
+
+            .feedback-text {
+                font-size: 2em;
+                padding: 12px 20px;
+            }
+
+            .instructions {
+                font-size: 12px;
+                padding: 8px 16px;
+                bottom: 10px;
+            }
+
+            .fish-guide {
+                position: static;
+                margin: 10px auto 0;
+                max-width: 200px;
+            }
+        }
+
+        /* How-to modal */
+        #fishingHowTo {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.4);
+            z-index: 50;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        .modal-card {
+            width: min(92vw, 520px);
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 10px 24px rgba(0,0,0,0.25);
+            padding: 18px;
+            text-align: left;
+        }
+
+        .modal-card h3 {
+            margin: 0 0 8px;
+            font-size: 18px;
+            color: #1b3b5a;
+        }
+
+        .modal-card p {
+            margin: 6px 0;
+            font-size: 14px;
+            color: #23465f;
+        }
+
+        .modal-list {
+            margin: 6px 0 0 18px;
+            padding: 0;
+            color: #23465f;
+            font-size: 14px;
+        }
+
+        .modal-actions {
+            margin-top: 12px;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .modal-btn {
+            padding: 10px 14px;
+            border: 0;
+            border-radius: 10px;
+            background: #ffcf54;
+            color: #1c273a;
+            font-weight: 800;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-header">
+        <h1 class="game-title">Fishing Quiz</h1>
+        <div class="game-info">
+            <div class="question-display" id="questionDisplay">Get ready to fish!</div>
+            <div class="score-display">Score: <span id="score">0</span></div>
+        </div>
+    </div>
+    
+    <div class="game-container">
+        <canvas id="gameCanvas" width="900" height="600"></canvas>
+        
+        <div class="ui-overlay" id="uiOverlay">
+            <button class="start-button" id="startBtn">Start Fishing</button>
+            <div class="score-panel" id="scorePanel" style="display:none;">
+                <h2>Final Score</h2>
+                <div class="score-breakdown" id="scoreBreakdown"></div>
+                <div class="button-row">
+                    <button class="restart-button" id="restartBtn">Play Again</button>
+                    <button class="end-button small-button" id="backBtn">Back to Topics</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="feedback-overlay" id="feedbackOverlay" style="display:none;">
+            <div class="feedback-text" id="feedbackText"></div>
+        </div>
+        
+        <div class="instructions" id="instructions">
+            Drag the hook to catch the fish with the correct answer! Read the text inside each fish carefully.
+        </div>
+        
+        <div class="fish-guide">
+            <div class="fish-item">
+                <div class="fish-icon" style="background: linear-gradient(45deg, #FF6B35, #4ECDC4);"></div>
+                <span>4 Fish = 4 Answers</span>
+            </div>
+            <div class="fish-item">
+                <div class="fish-icon" style="background: #FFD700; color: #1c273a; font-size: 10px; display: flex; align-items: center; justify-content: center; font-weight: bold;">ABC</div>
+                <span>Text Inside</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fishing How To Modal -->
+    <div id="fishingHowTo">
+        <div class="modal-card">
+            <h3>How to Play – Fishing Quiz</h3>
+            <ul class="modal-list">
+                <li>Drag the golden hook around the water to catch fish.</li>
+                <li>Each fish contains an answer option with white text.</li>
+                <li>Catch the fish that has the correct answer to the question.</li>
+                <li>Answer all 3 questions correctly to get maximum points!</li>
+            </ul>
+            <div class="modal-actions">
+                <button id="fishingStartBtn" class="modal-btn">Start Fishing Game</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game configuration
+        const gameConfig = {
+            canvasWidth: 900,
+            canvasHeight: 600,
+            waterLevel: 150,
+            fishColors: ["#FF6B35", "#4ECDC4", "#45B7D1", "#96CEB4"], // Orange, Teal, Blue, Green
+            fishCount: 4,
+            animations: {
+                waveSpeed: 0.02,
+                cloudSpeed: 0.3,
+                fishSpeed: 0.3,
+                hookSpeed: 3
+            }
+        };
+
+        class FishingQuiz {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.score = 0;
+                this.gameStarted = false;
+                this.gameTime = 0;
+                this.questionsAnswered = 0;
+                this.maxQuestions = 3; // 3 questions for consistency
+                this.audioContext = null; // Initialize audio context
+                
+                // Get session data
+                this.selectedTopic = sessionStorage.getItem('aiplay_topic') || 'maths';
+                this.game1Score = parseInt(sessionStorage.getItem('aiplay_game1Score'), 10) || 0;
+                this.game2Score = parseInt(sessionStorage.getItem('aiplay_game2Score'), 10) || 0;
+                this.nextIndex = parseInt(sessionStorage.getItem('aiplay_nextIndex'), 10) || 6;
+                
+                // Load questions
+                this.loadTopics();
+                
+                // Game objects
+                this.initializeGameObjects();
+                this.setupEventHandlers();
+                
+                // Start animation loop
+                this.animate();
+                
+                // Show how-to modal
+                document.getElementById('fishingHowTo').style.display = 'flex';
+                
+                this.displayCurrentQuestion();
+            }
+            
+            loadTopics() {
+                this.topics = {
+                    maths: {
+                        questions: [
+                            { 
+                                question: 'Addition symbol?', 
+                                answer: '+',
+                                options: ['+', '−', '×', '÷']
+                            },
+                            { 
+                                question: 'Result of addition?', 
+                                answer: 'sum',
+                                options: ['sum', 'difference', 'product', 'quotient']
+                            },
+                            { 
+                                question: 'Subtraction symbol?', 
+                                answer: '−',
+                                options: ['−', '+', '×', '÷']
+                            },
+                            { 
+                                question: 'Result of subtraction?', 
+                                answer: 'difference',
+                                options: ['difference', 'sum', 'product', 'quotient']
+                            },
+                            { 
+                                question: '7+5=?', 
+                                answer: '12',
+                                options: ['12', '11', '13', '10']
+                            },
+                            { 
+                                question: '15−6=?', 
+                                answer: '9',
+                                options: ['9', '8', '10', '7']
+                            }
+                        ]
+                    },
+                    aiAgents: {
+                        questions: [
+                            { 
+                                question: 'AI Agents sense tool?', 
+                                answer: 'Sensors',
+                                options: ['Sensors', 'Motors', 'Cameras', 'Speakers']
+                            },
+                            { 
+                                question: 'AI Agents action tool?', 
+                                answer: 'Actuators',
+                                options: ['Actuators', 'Sensors', 'Memory', 'CPU']
+                            },
+                            { 
+                                question: 'AI Agents main aim?', 
+                                answer: 'Goal',
+                                options: ['Goal', 'Speed', 'Memory', 'Power']
+                            },
+                            { 
+                                question: 'AI Agents reflex example?', 
+                                answer: 'Thermostat',
+                                options: ['Thermostat', 'Calculator', 'Phone', 'TV']
+                            },
+                            { 
+                                question: 'AI Agents learn from?', 
+                                answer: 'Data',
+                                options: ['Data', 'Music', 'Images', 'Videos']
+                            },
+                            { 
+                                question: 'AI Agents example?', 
+                                answer: 'Chatbot',
+                                options: ['Chatbot', 'Car', 'Book', 'Pen']
+                            }
+                        ]
+                    },
+                    sql: {
+                        questions: [
+                            { 
+                                question: 'Which SQL command creates a new table?', 
+                                answer: 'CREATE',
+                                options: ['CREATE', 'INSERT', 'SELECT', 'UPDATE']
+                            },
+                            { 
+                                question: 'Which SQL command retrieves data?', 
+                                answer: 'SELECT',
+                                options: ['SELECT', 'UPDATE', 'DELETE', 'DROP']
+                            },
+                            { 
+                                question: 'Command to clear all rows but keep table?', 
+                                answer: 'TRUNCATE',
+                                options: ['TRUNCATE', 'DELETE', 'DROP', 'ALTER']
+                            },
+                            { 
+                                question: 'Which command changes existing data?', 
+                                answer: 'UPDATE',
+                                options: ['UPDATE', 'INSERT', 'SELECT', 'GRANT']
+                            },
+                            { 
+                                question: 'Command to undo transaction changes?', 
+                                answer: 'ROLLBACK',
+                                options: ['ROLLBACK', 'COMMIT', 'SAVEPOINT', 'REVOKE']
+                            },
+                            { 
+                                question: 'SQL clause to filter data?', 
+                                answer: 'WHERE',
+                                options: ['WHERE', 'GROUP BY', 'ORDER BY', 'HAVING']
+                            },
+                            { 
+                                question: 'Keyword to sort results?', 
+                                answer: 'ORDER BY',
+                                options: ['ORDER BY', 'GROUP BY', 'SORT', 'ARRANGE']
+                            },
+                            { 
+                                question: 'JOIN that returns only matches?', 
+                                answer: 'INNER JOIN',
+                                options: ['INNER JOIN', 'LEFT JOIN', 'RIGHT JOIN', 'FULL JOIN']
+                            },
+                            { 
+                                question: 'Command to remove entire table?', 
+                                answer: 'DROP',
+                                options: ['DROP', 'DELETE', 'TRUNCATE', 'REVOKE']
+                            },
+                            { 
+                                question: 'Command to give user permissions?', 
+                                answer: 'GRANT',
+                                options: ['GRANT', 'INSERT', 'REVOKE', 'SAVEPOINT']
+                            }
+                        ]
+                    }
+                };
+                
+                this.currentQuestions = this.topics[this.selectedTopic].questions.slice(this.nextIndex, this.nextIndex + this.maxQuestions);
+            }
+            
+            displayCurrentQuestion() {
+                if (this.questionsAnswered < this.currentQuestions.length) {
+                    const q = this.currentQuestions[this.questionsAnswered];
+                    document.getElementById('questionDisplay').textContent = q.question;
+                } else {
+                    document.getElementById('questionDisplay').textContent = 'All questions answered!';
+                }
+            }
+            
+            initializeGameObjects() {
+                this.waterSurface = this.canvas.height - 450;
+                this.boat = { x: 200, y: this.waterSurface - 50, width: 120, height: 40, sway: 0 };
+                this.fisherman = { x: 250, y: this.waterSurface - 80, state: 'idle' };
+                this.rodTip = { x: 285, y: this.waterSurface - 95 };
+                
+                this.hook = { 
+                    x: 285, 
+                    y: this.waterSurface - 90, 
+                    isDragging: false, 
+                    isDropping: false,
+                    isCasting: false,
+                    speed: 0,
+                    originalX: 285,
+                    originalY: this.waterSurface - 90,
+                    radius: 8
+                };
+                
+                this.fishes = [];
+                this.clouds = [];
+                this.splashes = [];
+                this.particles = [];
+                this.waveOffset = 0;
+                this.mouseDown = false;
+                this.dragOffset = { x: 0, y: 0 };
+                
+                this.initializeClouds();
+                this.initializeFishes();
+            }
+            
+            setupEventHandlers() {
+                document.getElementById('startBtn').addEventListener('click', () => this.startGame());
+                document.getElementById('restartBtn').addEventListener('click', () => this.restartGame());
+                document.getElementById('backBtn').addEventListener('click', () => this.goBackToTopics());
+                document.getElementById('fishingStartBtn').addEventListener('click', () => {
+                    this.initAudio(); // Initialize audio on user interaction
+                    document.getElementById('fishingHowTo').style.display = 'none';
+                });
+                
+                // Mouse/touch events
+                this.canvas.addEventListener('mousedown', (e) => this.handleMouseDown(e));
+                this.canvas.addEventListener('mousemove', (e) => this.handleMouseMove(e));
+                this.canvas.addEventListener('mouseup', (e) => this.handleMouseUp(e));
+                this.canvas.addEventListener('mouseleave', (e) => this.handleMouseUp(e));
+                
+                this.canvas.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    this.handleMouseDown(e.touches[0]);
+                });
+                this.canvas.addEventListener('touchmove', (e) => {
+                    e.preventDefault();
+                    this.handleMouseMove(e.touches[0]);
+                });
+                this.canvas.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    this.handleMouseUp(e);
+                });
+            }
+            
+            getMousePos(e) {
+                const rect = this.canvas.getBoundingClientRect();
+                const scaleX = this.canvas.width / rect.width;
+                const scaleY = this.canvas.height / rect.height;
+                
+                return {
+                    x: (e.clientX - rect.left) * scaleX,
+                    y: (e.clientY - rect.top) * scaleY
+                };
+            }
+            
+            handleMouseDown(e) {
+                if (!this.gameStarted) return;
+                
+                const mousePos = this.getMousePos(e);
+                const hookDistance = Math.sqrt(
+                    Math.pow(mousePos.x - this.hook.x, 2) + Math.pow(mousePos.y - this.hook.y, 2)
+                );
+                
+                if (hookDistance <= this.hook.radius + 15) {
+                    this.hook.isDragging = true;
+                    this.mouseDown = true;
+                    this.dragOffset.x = mousePos.x - this.hook.x;
+                    this.dragOffset.y = mousePos.y - this.hook.y;
+                }
+            }
+            
+            handleMouseMove(e) {
+                if (!this.gameStarted || !this.hook.isDragging || !this.mouseDown) return;
+                
+                const mousePos = this.getMousePos(e);
+                this.hook.x = mousePos.x - this.dragOffset.x;
+                this.hook.y = mousePos.y - this.dragOffset.y;
+                
+                // Keep hook within bounds
+                this.hook.x = Math.max(50, Math.min(this.canvas.width - 50, this.hook.x));
+                this.hook.y = Math.max(50, this.hook.y);
+            }
+            
+            handleMouseUp(e) {
+                if (this.hook.isDragging) {
+                    this.hook.isDragging = false;
+                    this.mouseDown = false;
+                }
+            }
+            
+            startGame() {
+                this.initAudio(); // Initialize audio when game starts
+                this.gameStarted = true;
+                this.initializeFishes(); // Initialize fish for first question
+                document.getElementById('startBtn').style.display = 'none';
+                document.getElementById('instructions').style.display = 'block';
+            }
+            
+            restartGame() {
+                this.score = 0;
+                this.questionsAnswered = 0;
+                this.gameStarted = false;
+                this.resetHook();
+                this.splashes = [];
+                this.particles = [];
+                this.fishes = [];
+                this.updateScore();
+                this.displayCurrentQuestion();
+                document.getElementById('startBtn').style.display = 'block';
+                document.getElementById('scorePanel').style.display = 'none';
+                document.getElementById('instructions').style.display = 'block';
+            }
+            
+            goBackToTopics() {
+                // Clear fishing game state and return to topic selection
+                sessionStorage.removeItem('aiplay_topic');
+                sessionStorage.removeItem('aiplay_game1Score');
+                sessionStorage.removeItem('aiplay_game2Score');
+                sessionStorage.removeItem('aiplay_nextIndex');
+                window.location.href = 'game2.html';
+            }
+            
+            resetHook() {
+                this.hook.x = this.hook.originalX;
+                this.hook.y = this.hook.originalY;
+                this.hook.isDragging = false;
+                this.hook.isDropping = false;
+                this.hook.isCasting = false;
+                this.fisherman.state = 'idle';
+            }
+            
+            initializeClouds() {
+                this.clouds = [
+                    { x: 100, y: 50, width: 80, height: 40, speed: 0.3 },
+                    { x: 400, y: 30, width: 100, height: 50, speed: 0.2 },
+                    { x: 700, y: 60, width: 90, height: 45, speed: 0.25 }
+                ];
+            }
+            
+            initializeFishes() {
+                this.fishes = [];
+                if (this.questionsAnswered >= this.currentQuestions.length) return;
+                
+                const currentQ = this.currentQuestions[this.questionsAnswered];
+                if (!currentQ || !currentQ.options) return;
+                
+                const waterTop = this.waterSurface + 80;
+                const waterBottom = this.canvas.height - 80;
+                const waterHeight = waterBottom - waterTop;
+                
+                // Shuffle options for randomization
+                const shuffledOptions = [...currentQ.options].sort(() => Math.random() - 0.5);
+                
+                for (let i = 0; i < gameConfig.fishCount; i++) {
+                    const answerText = shuffledOptions[i];
+                    const isCorrect = answerText === currentQ.answer;
+                    
+                    // Calculate fish size based on text length
+                    const textLength = answerText.length;
+                    const baseWidth = 120;
+                    const baseHeight = 80;
+                    const width = Math.max(baseWidth, Math.min(200, baseWidth + textLength * 8));
+                    const height = Math.max(baseHeight, Math.min(120, baseHeight + textLength * 2));
+                    
+                    // Calculate font size based on fish size and screen size
+                    const baseFontSize = Math.max(14, Math.min(20, width / (textLength + 2)));
+                    const screenScale = Math.min(window.innerWidth / 900, window.innerHeight / 600);
+                    const fontSize = Math.max(12, baseFontSize * Math.max(0.8, screenScale));
+                    
+                    // Position fish at different depths
+                    const yPosition = waterTop + (i * waterHeight / gameConfig.fishCount) + Math.random() * 60;
+                    
+                    this.fishes.push({
+                        x: Math.random() * (this.canvas.width - width - 100) + 50,
+                        y: yPosition,
+                        width: width,
+                        height: height,
+                        baseWidth: width,
+                        baseHeight: height,
+                        vx: (Math.random() - 0.5) * 1.5,
+                        vy: (Math.random() - 0.5) * 0.3,
+                        color: gameConfig.fishColors[i],
+                        answerText: answerText,
+                        isCorrect: isCorrect,
+                        fontSize: fontSize,
+                        animFrame: Math.random() * 60,
+                        direction: Math.random() > 0.5 ? 1 : -1,
+                        caught: false,
+                        breatheOffset: Math.random() * Math.PI * 2
+                    });
+                }
+            }
+            
+            updateScore() {
+                document.getElementById('score').textContent = this.score;
+            }
+            
+            showFeedback(text, isSuccess) {
+                const overlay = document.getElementById('feedbackOverlay');
+                const textElement = document.getElementById('feedbackText');
+                
+                textElement.textContent = text;
+                textElement.className = `feedback-text ${isSuccess ? 'success' : 'error'}`;
+                overlay.style.display = 'block';
+                
+                setTimeout(() => {
+                    overlay.style.display = 'none';
+                }, 2000);
+            }
+            
+            checkCollisions() {
+                for (let fish of this.fishes) {
+                    if (fish.caught) continue;
+                    
+                    const fishCenterX = fish.x + fish.width / 2;
+                    const fishCenterY = fish.y + fish.height / 2;
+                    const distance = Math.sqrt(
+                        Math.pow(this.hook.x - fishCenterX, 2) + 
+                        Math.pow(this.hook.y - fishCenterY, 2)
+                    );
+                    
+                    // Larger collision area for bigger fish
+                    const collisionRadius = Math.max(40, fish.width / 3);
+                    
+                    if (distance < collisionRadius) {
+                        fish.caught = true;
+                        this.handleFishCaught(fish);
+                        return;
+                    }
+                }
+            }
+            
+            handleFishCaught(fish) {
+                this.createSplash(this.hook.x, this.waterSurface);
+                this.playFishCatchSound(fish.isCorrect);
+                
+                if (fish.isCorrect) {
+                    this.score += 1;
+                    this.updateScore();
+                    this.showFeedback(`Correct! "${fish.answerText}"`, true);
+                } else {
+                    this.showFeedback(`Wrong! "${fish.answerText}"`, false);
+                }
+                
+                this.questionsAnswered++;
+                this.displayCurrentQuestion();
+                
+                setTimeout(() => {
+                    this.resetHook();
+                    
+                    // Generate new fish for next question or end game
+                    if (this.questionsAnswered >= this.maxQuestions) {
+                        this.endGame();
+                    } else {
+                        this.initializeFishes();
+                    }
+                }, 2500);
+            }
+            
+            initAudio() {
+                if (!this.audioContext) {
+                    try {
+                        this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                        if (this.audioContext.state === 'suspended') {
+                            this.audioContext.resume();
+                        }
+                        console.log('Fishing audio initialized');
+                    } catch (e) {
+                        console.log('Fishing audio not supported:', e);
+                    }
+                }
+            }
+            
+            playFishCatchSound(isCorrect) {
+                if (!this.audioContext || this.audioContext.state !== 'running') return;
+                
+                try {
+                    if (isCorrect) {
+                        // Play water splash + success chime
+                        const splashOsc = this.audioContext.createOscillator();
+                        const splashGain = this.audioContext.createGain();
+                        const splashFilter = this.audioContext.createBiquadFilter();
+                        
+                        splashOsc.connect(splashFilter);
+                        splashFilter.connect(splashGain);
+                        splashGain.connect(this.audioContext.destination);
+                        
+                        // Water splash sound  
+                        splashOsc.type = 'sawtooth';
+                        splashFilter.type = 'lowpass';
+                        splashFilter.frequency.setValueAtTime(2000, this.audioContext.currentTime);
+                        splashGain.gain.setValueAtTime(0.3, this.audioContext.currentTime);
+                        splashGain.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.2);
+                        
+                        splashOsc.start(this.audioContext.currentTime);
+                        splashOsc.stop(this.audioContext.currentTime + 0.2);
+                        
+                        // Success chime
+                        [523, 659, 784].forEach((freq, i) => {
+                            const oscillator = this.audioContext.createOscillator();
+                            const gainNode = this.audioContext.createGain();
+                            
+                            oscillator.connect(gainNode);
+                            gainNode.connect(this.audioContext.destination);
+                            
+                            oscillator.frequency.setValueAtTime(freq, this.audioContext.currentTime + 0.2 + i * 0.1);
+                            oscillator.type = 'sine';
+                            
+                            gainNode.gain.setValueAtTime(0.2, this.audioContext.currentTime + 0.2 + i * 0.1);
+                            gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.2 + i * 0.1 + 0.3);
+                            
+                            oscillator.start(this.audioContext.currentTime + 0.2 + i * 0.1);
+                            oscillator.stop(this.audioContext.currentTime + 0.2 + i * 0.1 + 0.3);
+                        });
+                    } else {
+                        // Wrong fish caught - disappointed sound
+                        const oscillator = this.audioContext.createOscillator();
+                        const gainNode = this.audioContext.createGain();
+                        
+                        oscillator.connect(gainNode);
+                        gainNode.connect(this.audioContext.destination);
+                        
+                        oscillator.frequency.setValueAtTime(300, this.audioContext.currentTime);
+                        oscillator.frequency.exponentialRampToValueAtTime(150, this.audioContext.currentTime + 0.5);
+                        oscillator.type = 'sawtooth';
+                        
+                        gainNode.gain.setValueAtTime(0.25, this.audioContext.currentTime);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.5);
+                        
+                        oscillator.start(this.audioContext.currentTime);
+                        oscillator.stop(this.audioContext.currentTime + 0.5);
+                    }
+                } catch (e) {
+                    console.log('Fishing sound failed:', e);
+                }
+            }
+            
+            endGame() {
+                this.gameStarted = false;
+                const totalScore = this.game1Score + this.game2Score + this.score;
+                
+                // Save final scores
+                sessionStorage.setItem('aiplay_game3Score', String(this.score));
+                sessionStorage.setItem('aiplay_totalScore', String(totalScore));
+                
+                // Show final scoreboard
+                document.getElementById('scoreBreakdown').innerHTML = `
+                    <div><strong>Game 1 (Bubble)</strong>: ${this.game1Score}/3</div>
+                    <div><strong>Game 2 (Rocket)</strong>: ${this.game2Score}/3</div>
+                    <div><strong>Game 3 (Fishing)</strong>: ${this.score}/3</div>
+                    <div style="margin-top:8px; font-size:1.2em;"><strong>Total</strong>: ${totalScore}/9</div>
+                `;
+                
+                document.getElementById('scorePanel').style.display = 'block';
+                document.getElementById('instructions').style.display = 'none';
+            }
+            
+            createSplash(x, y) {
+                for (let i = 0; i < 3; i++) {
+                    this.splashes.push({
+                        x: x,
+                        y: y,
+                        size: i * 10,
+                        maxSize: 50 + (i * 15),
+                        life: 40 - (i * 5),
+                        maxLife: 40 - (i * 5),
+                        delay: i * 5
+                    });
+                }
+                
+                for (let i = 0; i < 12; i++) {
+                    this.particles.push({
+                        x: x + (Math.random() - 0.5) * 10,
+                        y: y + (Math.random() - 0.5) * 10,
+                        vx: (Math.random() - 0.5) * 8,
+                        vy: Math.random() * -6 - 3,
+                        life: 30,
+                        maxLife: 30,
+                        size: Math.random() * 4 + 2,
+                        gravity: 0.3
+                    });
+                }
+            }
+            
+            // Remove spawnNewFish method - no longer needed as we regenerate all fish per question
+            
+            update() {
+                this.gameTime++;
+                this.waveOffset += gameConfig.animations.waveSpeed;
+                
+                // Update boat swaying
+                this.boat.sway = Math.sin(this.gameTime * 0.02) * 3;
+                this.rodTip.x = 285 + this.boat.sway * 0.3;
+                this.rodTip.y = this.waterSurface - 95 + this.boat.sway * 0.2;
+                
+                // Update original hook position with boat sway
+                if (!this.hook.isDragging) {
+                    this.hook.originalX = this.rodTip.x;
+                    this.hook.originalY = this.rodTip.y + 5;
+                }
+                
+                // Update clouds
+                for (let cloud of this.clouds) {
+                    cloud.x += cloud.speed;
+                    if (cloud.x > this.canvas.width + cloud.width) {
+                        cloud.x = -cloud.width;
+                    }
+                }
+                
+                // Update fish
+                for (let fish of this.fishes) {
+                    if (fish.caught) continue;
+                    
+                    fish.animFrame++;
+                    fish.breatheOffset += 0.03;
+                    
+                    // Smooth swimming movement
+                    fish.x += fish.vx;
+                    fish.y += fish.vy;
+                    
+                    // Gentle breathing animation
+                    const breatheScale = 1 + Math.sin(fish.breatheOffset) * 0.02;
+                    fish.width = fish.baseWidth * breatheScale;
+                    fish.height = fish.baseHeight * breatheScale;
+                    
+                    // Boundary checking with padding
+                    const padding = 20;
+                    if (fish.x <= padding || fish.x >= this.canvas.width - fish.width - padding) {
+                        fish.vx *= -1;
+                        fish.direction = fish.vx > 0 ? 1 : -1;
+                    }
+                    
+                    const waterTop = this.waterSurface + 50;
+                    const waterBottom = this.canvas.height - 50;
+                    if (fish.y <= waterTop || fish.y >= waterBottom - fish.height) {
+                        fish.vy *= -1;
+                    }
+                    
+                    // Occasional direction changes for natural movement
+                    if (Math.random() < 0.002) {
+                        fish.vx = (Math.random() - 0.5) * 1.5;
+                        fish.vy = (Math.random() - 0.5) * 0.3;
+                        fish.direction = fish.vx > 0 ? 1 : -1;
+                    }
+                }
+                
+                // Update splashes and particles
+                for (let i = this.splashes.length - 1; i >= 0; i--) {
+                    const splash = this.splashes[i];
+                    if (splash.delay > 0) {
+                        splash.delay--;
+                        continue;
+                    }
+                    splash.life--;
+                    splash.size = splash.maxSize * (1 - splash.life / splash.maxLife);
+                    if (splash.life <= 0) {
+                        this.splashes.splice(i, 1);
+                    }
+                }
+                
+                for (let i = this.particles.length - 1; i >= 0; i--) {
+                    const particle = this.particles[i];
+                    particle.x += particle.vx;
+                    particle.y += particle.vy;
+                    particle.vy += particle.gravity;
+                    particle.vx *= 0.99;
+                    particle.life--;
+                    
+                    if (particle.life <= 0 || particle.y > this.canvas.height) {
+                        this.particles.splice(i, 1);
+                    }
+                }
+                
+                // Check collisions
+                if (this.gameStarted) {
+                    this.checkCollisions();
+                }
+            }
+            
+            render() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                this.drawSky();
+                this.drawWater();
+                this.drawBoat();
+                this.drawFisherman();
+                
+                // Draw fish
+                for (let fish of this.fishes) {
+                    this.drawFish(fish);
+                }
+                
+                this.drawFishingLine();
+                this.drawHook();
+                this.drawSplashes();
+                this.drawParticles();
+            }
+            
+            drawSky() {
+                // Sky gradient
+                const gradient = this.ctx.createLinearGradient(0, 0, 0, this.waterSurface);
+                gradient.addColorStop(0, '#87CEEB');
+                gradient.addColorStop(1, '#B0E0E6');
+                
+                this.ctx.fillStyle = gradient;
+                this.ctx.fillRect(0, 0, this.canvas.width, this.waterSurface);
+                
+                // Sun
+                this.ctx.fillStyle = '#FFD700';
+                this.ctx.beginPath();
+                this.ctx.arc(this.canvas.width - 100, 60, 25, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                // Clouds
+                for (let cloud of this.clouds) {
+                    this.drawCloud(cloud.x, cloud.y, cloud.width, cloud.height);
+                }
+            }
+            
+            drawCloud(x, y, width, height) {
+                this.ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                this.ctx.beginPath();
+                this.ctx.arc(x, y + height/2, height/2, 0, Math.PI * 2);
+                this.ctx.arc(x + width/4, y, height/2, 0, Math.PI * 2);
+                this.ctx.arc(x + width/2, y + height/3, height/2, 0, Math.PI * 2);
+                this.ctx.arc(x + width*3/4, y, height/2, 0, Math.PI * 2);
+                this.ctx.arc(x + width, y + height/2, height/2, 0, Math.PI * 2);
+                this.ctx.fill();
+            }
+            
+            drawWater() {
+                // Water background
+                const gradient = this.ctx.createLinearGradient(0, this.waterSurface, 0, this.canvas.height);
+                gradient.addColorStop(0, '#4169E1');
+                gradient.addColorStop(0.5, '#1E90FF');
+                gradient.addColorStop(1, '#191970');
+                
+                this.ctx.fillStyle = gradient;
+                this.ctx.fillRect(0, this.waterSurface, this.canvas.width, this.canvas.height - this.waterSurface);
+                
+                // Waves
+                this.ctx.strokeStyle = '#87CEEB';
+                this.ctx.lineWidth = 3;
+                this.ctx.globalAlpha = 0.6;
+                
+                for (let wave = 0; wave < 4; wave++) {
+                    this.ctx.beginPath();
+                    this.ctx.lineWidth = 4 - wave;
+                    
+                    for (let x = 0; x <= this.canvas.width; x += 5) {
+                        const y = this.waterSurface + Math.sin(x * 0.02 + this.waveOffset + wave * 2) * (10 - wave * 2);
+                        if (x === 0) {
+                            this.ctx.moveTo(x, y);
+                        } else {
+                            this.ctx.lineTo(x, y);
+                        }
+                    }
+                    this.ctx.stroke();
+                }
+                
+                this.ctx.globalAlpha = 1;
+            }
+            
+            drawBoat() {
+                const boatY = this.boat.y + this.boat.sway;
+                
+                // Boat hull
+                this.ctx.fillStyle = '#8B4513';
+                this.ctx.fillRect(this.boat.x - 10, boatY + 20, 140, 20);
+                
+                // Boat deck
+                this.ctx.fillStyle = '#DEB887';
+                this.ctx.fillRect(this.boat.x, boatY + 10, 120, 12);
+            }
+            
+            drawFisherman() {
+                const fishermanY = this.fisherman.y + this.boat.sway;
+                
+                // Body
+                this.ctx.fillStyle = '#4169E1';
+                this.ctx.fillRect(this.fisherman.x, fishermanY + 20, 15, 25);
+                
+                // Head
+                this.ctx.fillStyle = '#FDBCB4';
+                this.ctx.beginPath();
+                this.ctx.arc(this.fisherman.x + 7, fishermanY + 10, 8, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                // Hat
+                this.ctx.fillStyle = '#32CD32';
+                this.ctx.fillRect(this.fisherman.x + 2, fishermanY + 2, 10, 8);
+                
+                // Fishing rod
+                this.ctx.strokeStyle = '#8B4513';
+                this.ctx.lineWidth = 3;
+                this.ctx.beginPath();
+                this.ctx.moveTo(this.fisherman.x + 15, fishermanY + 15);
+                this.ctx.lineTo(this.rodTip.x, this.rodTip.y);
+                this.ctx.stroke();
+            }
+            
+            drawFishingLine() {
+                this.ctx.strokeStyle = '#000000';
+                this.ctx.lineWidth = 2;
+                this.ctx.beginPath();
+                this.ctx.moveTo(this.rodTip.x, this.rodTip.y);
+                this.ctx.lineTo(this.hook.x, this.hook.y);
+                this.ctx.stroke();
+            }
+            
+            drawHook() {
+                // Hook shadow
+                this.ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+                this.ctx.beginPath();
+                this.ctx.arc(this.hook.x + 2, this.hook.y + 2, this.hook.radius, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                // Hook body
+                this.ctx.fillStyle = '#FFD700';
+                this.ctx.beginPath();
+                this.ctx.arc(this.hook.x, this.hook.y, this.hook.radius, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                // Hook outline
+                this.ctx.strokeStyle = '#B8860B';
+                this.ctx.lineWidth = 2;
+                this.ctx.stroke();
+            }
+            
+            drawFish(fish) {
+                if (fish.caught) return;
+                
+                this.ctx.save();
+                this.ctx.translate(fish.x + fish.width/2, fish.y + fish.height/2);
+                this.ctx.scale(fish.direction, 1);
+                
+                // Fish shadow for depth
+                this.ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+                this.ctx.beginPath();
+                this.ctx.ellipse(2, 2, fish.width/2, fish.height/2, 0, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                // Fish body with gradient
+                const gradient = this.ctx.createRadialGradient(0, -fish.height/4, 0, 0, 0, fish.width/2);
+                gradient.addColorStop(0, this.lightenColor(fish.color, 30));
+                gradient.addColorStop(1, fish.color);
+                
+                this.ctx.fillStyle = gradient;
+                this.ctx.beginPath();
+                this.ctx.ellipse(0, 0, fish.width/2, fish.height/2, 0, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                // Fish outline
+                this.ctx.strokeStyle = this.darkenColor(fish.color, 20);
+                this.ctx.lineWidth = 2;
+                this.ctx.stroke();
+                
+                // Fish tail with animation
+                const tailWag = Math.sin(fish.animFrame * 0.15) * 4;
+                this.ctx.fillStyle = fish.color;
+                this.ctx.beginPath();
+                this.ctx.moveTo(-fish.width/2, 0);
+                this.ctx.lineTo(-fish.width/2 - 18, -12 + tailWag);
+                this.ctx.lineTo(-fish.width/2 - 25, 0 + tailWag);
+                this.ctx.lineTo(-fish.width/2 - 18, 12 + tailWag);
+                this.ctx.closePath();
+                this.ctx.fill();
+                this.ctx.stroke();
+                
+                // Fish eye
+                this.ctx.fillStyle = '#FFFFFF';
+                this.ctx.beginPath();
+                this.ctx.arc(fish.width/5, -fish.height/6, 6, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                this.ctx.fillStyle = '#000000';
+                this.ctx.beginPath();
+                this.ctx.arc(fish.width/5 + 1, -fish.height/6, 3, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                // Answer text - scale back to original orientation
+                this.ctx.scale(fish.direction, 1);
+                this.ctx.fillStyle = '#FFFFFF';
+                this.ctx.strokeStyle = '#000000';
+                this.ctx.lineWidth = 3;
+                this.ctx.font = `bold ${fish.fontSize}px 'Nunito', sans-serif`;
+                this.ctx.textAlign = 'center';
+                this.ctx.textBaseline = 'middle';
+                
+                // Text with outline for better visibility
+                this.ctx.strokeText(fish.answerText, 0, fish.height/8);
+                this.ctx.fillText(fish.answerText, 0, fish.height/8);
+                
+                this.ctx.restore();
+            }
+            
+            lightenColor(color, percent) {
+                const num = parseInt(color.replace("#",""), 16);
+                const amt = Math.round(2.55 * percent);
+                const R = (num >> 16) + amt;
+                const G = (num >> 8 & 0x00FF) + amt;
+                const B = (num & 0x0000FF) + amt;
+                return "#" + (0x1000000 + (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 +
+                    (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 + (B < 255 ? B < 1 ? 0 : B : 255))
+                    .toString(16).slice(1);
+            }
+            
+            darkenColor(color, percent) {
+                const num = parseInt(color.replace("#",""), 16);
+                const amt = Math.round(2.55 * percent);
+                const R = (num >> 16) - amt;
+                const G = (num >> 8 & 0x00FF) - amt;
+                const B = (num & 0x0000FF) - amt;
+                return "#" + (0x1000000 + (R > 255 ? 255 : R < 0 ? 0 : R) * 0x10000 +
+                    (G > 255 ? 255 : G < 0 ? 0 : G) * 0x100 + (B > 255 ? 255 : B < 0 ? 0 : B))
+                    .toString(16).slice(1);
+            }
+            
+            drawSplashes() {
+                for (let splash of this.splashes) {
+                    if (splash.delay > 0) continue;
+                    
+                    this.ctx.strokeStyle = '#87CEEB';
+                    this.ctx.lineWidth = 3;
+                    this.ctx.globalAlpha = splash.life / splash.maxLife;
+                    
+                    this.ctx.beginPath();
+                    this.ctx.arc(splash.x, splash.y, splash.size, 0, Math.PI * 2);
+                    this.ctx.stroke();
+                }
+                this.ctx.globalAlpha = 1;
+            }
+            
+            drawParticles() {
+                for (let particle of this.particles) {
+                    this.ctx.fillStyle = '#87CEEB';
+                    this.ctx.globalAlpha = particle.life / particle.maxLife;
+                    this.ctx.beginPath();
+                    this.ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+                    this.ctx.fill();
+                }
+                this.ctx.globalAlpha = 1;
+            }
+            
+            animate() {
+                this.update();
+                this.render();
+                requestAnimationFrame(() => this.animate());
+            }
+        }
+
+        // Initialize game when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new FishingQuiz();
+        });
+    </script>
+</body>
+</html>
