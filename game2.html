@@ -41,36 +41,7 @@
         }
 
         /* Mobile/Web Toggle Button */
-        .version-toggle {
-            position: fixed;
-            top: 15px;
-            right: 15px;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            border: 2px solid rgba(255, 255, 255, 0.8);
-            background: rgba(135, 206, 235, 0.9);
-            backdrop-filter: blur(10px);
-            color: white;
-            font-size: 20px;
-            cursor: pointer;
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            transition: all 0.3s ease;
-            touch-action: manipulation;
-        }
-
-        .version-toggle:hover {
-            transform: scale(1.1);
-            background: rgba(76, 175, 80, 0.9);
-        }
-
-        .version-toggle.web-mode {
-            background: rgba(76, 175, 80, 0.9);
-        }
+        /* Toggle button removed - auto-detect mobile only */
 
         #gameCanvas {
             position: absolute;
@@ -173,13 +144,23 @@
             }
             
             body.mobile-version .bubble {
-                width: 70px !important;
-                height: 70px !important;
-                font-size: 12px !important;
-                padding: 5px !important;
+                width: 45px !important;         /* Smaller for mobile optimization */
+                height: 45px !important;        /* Smaller for mobile optimization */
+                font-size: 9px !important;      /* Smaller font for compact display */
+                padding: 2px !important;        /* Minimal padding */
                 border-width: 2px !important;
-                /* Enhanced for portrait format */
-                box-shadow: 0 0 20px rgba(255,255,255,0.6), 0 4px 15px rgba(0,0,0,0.3) !important;
+                max-width: 45px !important;
+                min-width: 45px !important;
+                min-height: 45px !important;
+                /* Enhanced mobile-optimized styling */
+                box-shadow: 0 0 12px rgba(255,255,255,0.4), 0 2px 8px rgba(0,0,0,0.25) !important;
+                /* Better text handling for smaller bubbles */
+                line-height: 1.0 !important;
+                word-wrap: break-word !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+                font-weight: bold !important;
+                text-shadow: 1px 1px 2px rgba(0,0,0,0.7) !important;
             }
         }
 
@@ -229,34 +210,39 @@
                 0 6px 16px rgba(0,0,0,0.3);
         }
 
-        /* MOBILE BUBBLE OPTIMIZATIONS */
+        /* MOBILE BUBBLE OPTIMIZATIONS - SMALLER SIZES */
         @media screen and (max-width: 768px), (pointer: coarse) {
             body.mobile-version .bubble {
-                width: 90px !important;
-                height: 90px !important;
-                font-size: 14px !important;
-                padding: 8px !important;
-                max-width: 85px !important;
+                width: 62px !important;         /* Reduced from 90px */
+                height: 62px !important;        /* Reduced from 90px */
+                font-size: 11px !important;     /* Reduced from 14px */
+                padding: 5px !important;        /* Reduced from 8px */
+                max-width: 62px !important;     /* Reduced from 85px */
                 border-width: 2px !important;
-                /* Enhanced touch target */
+                /* Enhanced touch target - still finger-friendly */
                 min-width: 44px;
                 min-height: 44px;
+                /* Better text handling */
+                line-height: 1.2 !important;
+                font-weight: 600 !important;
             }
             
             body.mobile-version .bubble:active {
-                transform: scale(0.95);
+                transform: scale(0.9);           /* More noticeable press effect */
                 transition: transform 0.1s ease;
             }
         }
 
-        /* Mobile Portrait Bubble Adjustments */
+        /* Mobile Portrait Bubble Adjustments - SMALLER */
         @media screen and (max-width: 768px) and (orientation: portrait) {
             body.mobile-version .bubble {
-                width: 95px !important;
-                height: 95px !important;
-                font-size: 15px !important;
+                width: 60px !important;         /* Reduced from 95px */
+                height: 60px !important;        /* Reduced from 95px */
+                font-size: 10px !important;     /* Reduced from 15px */
                 font-weight: bold !important;
-                padding: 10px !important;
+                padding: 6px !important;        /* Reduced from 10px */
+                /* Tighter spacing for more bubbles on screen */
+                margin: 2px !important;
             }
         }
 
@@ -567,11 +553,7 @@
     </style>
 </head>
 <body>
-    <!-- Mobile/Web Toggle Button -->
-    <button class="version-toggle" id="versionToggle" title="Switch to Web Version">
-        🖥️
-    </button>
-    
+    <!-- Toggle button removed - auto mobile detection -->
     <div id="gameContainer">
         <div id="topicOverlay">
             <div class="overlay-card">
@@ -1030,109 +1012,26 @@ SELECT Name, Age FROM Students WHERE Grade = 'A';
             };
         }
 
-        // AUTO-APPLY MOBILE VERSION
+        // AUTO-DETECT MOBILE AND APPLY FULL-SCREEN VERSION
         function initializeMobileOptimization() {
             const deviceInfo = detectMobileDevice();
-            const savedVersion = localStorage.getItem('aiplay_version_preference');
             
-            // Auto-detect and apply mobile version
-            if (deviceInfo.isMobile && !savedVersion) {
+            // Always auto-detect and apply appropriate version
+            if (deviceInfo.isMobile) {
                 document.body.classList.add('mobile-version', 'mobile-detected');
-                updateToggleButton('mobile');
-            } else if (savedVersion === 'mobile') {
-                document.body.classList.add('mobile-version');
-                updateToggleButton('mobile');
-            } else if (savedVersion === 'web') {
+                console.log('Mobile device detected - applying mobile full-screen version');
+            } else {
                 document.body.classList.add('web-version');
-                updateToggleButton('web');
-            } else {
-                // Default behavior for desktop
-                if (!deviceInfo.isMobile) {
-                    document.body.classList.add('web-version');
-                    updateToggleButton('web');
-                } else {
-                    document.body.classList.add('mobile-version');
-                    updateToggleButton('mobile');
-                }
+                console.log('Desktop device detected - applying web version');
             }
         }
 
-        // VERSION TOGGLE FUNCTIONALITY
-        function updateToggleButton(currentMode) {
-            const button = document.getElementById('versionToggle');
-            if (currentMode === 'mobile') {
-                button.innerHTML = '🖥️';
-                button.title = 'Switch to Web Version (Desktop)';
-                button.classList.remove('web-mode');
-                // Add Instagram Reel style feedback
-                showModeNotification('📱 Instagram Reel Mobile Format Active');
-            } else {
-                button.innerHTML = '📱';
-                button.title = 'Switch to Mobile Version (Instagram Reel Format)';
-                button.classList.add('web-mode');
-                showModeNotification('🖥️ Desktop Web Format Active');
-            }
-        }
+        // Auto-detection only - no toggle functionality needed
 
-        // VISUAL FEEDBACK FOR MODE SWITCHING
-        function showModeNotification(message) {
-            // Remove existing notification
-            const existing = document.querySelector('.mode-notification');
-            if (existing) existing.remove();
-            
-            // Create notification
-            const notification = document.createElement('div');
-            notification.className = 'mode-notification';
-            notification.textContent = message;
-            notification.style.cssText = `
-                position: fixed;
-                top: 80px;
-                right: 15px;
-                background: rgba(76, 175, 80, 0.95);
-                color: white;
-                padding: 10px 15px;
-                border-radius: 25px;
-                font-size: 14px;
-                font-weight: bold;
-                z-index: 2000;
-                box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-                backdrop-filter: blur(10px);
-                border: 2px solid rgba(255,255,255,0.3);
-                animation: slideInRight 0.3s ease-out;
-            `;
-            
-            document.body.appendChild(notification);
-            
-            // Auto-remove after 2 seconds
-            setTimeout(() => {
-                if (notification && notification.parentNode) {
-                    notification.style.animation = 'slideOutRight 0.3s ease-in';
-                    setTimeout(() => notification.remove(), 300);
-                }
-            }, 2000);
-        }
-
-        // TOGGLE EVENT LISTENER
+        // AUTO-INITIALIZE ON PAGE LOAD
         document.addEventListener('DOMContentLoaded', function() {
             initializeMobileOptimization();
-            
-            document.getElementById('versionToggle').addEventListener('click', function() {
-                const body = document.body;
-                
-                if (body.classList.contains('mobile-version')) {
-                    // Switch to web version
-                    body.classList.remove('mobile-version', 'mobile-detected');
-                    body.classList.add('web-version');
-                    updateToggleButton('web');
-                    localStorage.setItem('aiplay_version_preference', 'web');
-                } else {
-                    // Switch to mobile version
-                    body.classList.remove('web-version');
-                    body.classList.add('mobile-version');
-                    updateToggleButton('mobile');
-                    localStorage.setItem('aiplay_version_preference', 'mobile');
-                }
-            });
+            adjustCanvasForMobile();
         });
 
         // RESPONSIVE CANVAS ADJUSTMENT
