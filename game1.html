@@ -174,7 +174,9 @@
                 overflow: hidden !important;
                 top: 0 !important;
                 left: 0 !important;
-                background: #000 !important; /* Black bars for Instagram feel */
+                margin: 0 !important;
+                padding: 0 !important;
+                background: linear-gradient(to bottom, var(--dark-blue) 0%, var(--sky-blue) 100%) !important;
                 display: flex !important;
                 justify-content: center !important;
                 align-items: center !important;
@@ -182,21 +184,26 @@
             
             body.mobile-version .game-container {
                 width: 100vw !important;
-                height: 178vw !important; /* 9:16 ratio = width * 1.778 */
-                max-height: 100vh !important;
-                max-width: 56.25vh !important; /* 9:16 ratio = height * 0.5625 */
-                position: relative !important;
+                height: 100vh !important;
+                position: fixed !important;
+                top: 0 !important;
+                left: 0 !important;
                 background: linear-gradient(to bottom, var(--dark-blue) 0%, var(--sky-blue) 100%) !important;
-                border-radius: 25px !important;
+                border-radius: 0 !important;
                 overflow: hidden !important;
                 box-shadow: 0 0 30px rgba(163,218,255,0.4) !important;
                 border: 3px solid rgba(255,255,255,0.3) !important;
             }
             
             body.mobile-version canvas {
-                width: 100% !important;
-                height: 100% !important;
-                border-radius: 25px !important;
+                width: 100vw !important;
+                height: 100vh !important;
+                position: fixed !important;
+                top: 0 !important;
+                left: 0 !important;
+                border-radius: 0 !important;
+                margin: 0 !important;
+                padding: 0 !important;
             }
             
             body.mobile-version .title {
