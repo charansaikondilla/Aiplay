@@ -34,6 +34,35 @@
             /* Mobile portrait optimization */
             -webkit-text-size-adjust: 100%;
             -ms-text-size-adjust: 100%;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            touch-action: manipulation;
+            -webkit-touch-callout: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        /* Portrait mode enforcement for mobile */
+        @media screen and (max-width: 768px) and (orientation: landscape) {
+            body::before {
+                content: "📱 Please rotate your device to portrait mode for optimal fishing experience!";
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.9);
+                color: white;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 9999;
+                font-size: 1.2em;
+                text-align: center;
+                padding: 20px;
+                box-sizing: border-box;
+            }
         }
         
         .game-header {
@@ -47,6 +76,32 @@
             border-bottom: 2px solid rgba(255, 255, 255, 0.3);
             z-index: 20;
             min-height: 80px;
+        }
+        
+        /* Mobile portrait optimizations for game header */
+        @media screen and (max-width: 768px) and (orientation: portrait) {
+            body:not(.web-version) .game-header {
+                padding: 10px 15px !important;
+                min-height: 85px !important;
+            }
+            
+            body:not(.web-version) .game-title {
+                font-size: 1.4em !important;
+                margin-bottom: 6px !important;
+            }
+            
+            body:not(.web-version) .score-display {
+                font-size: 1em !important;
+                padding: 5px 10px !important;
+                min-width: 60px !important;
+            }
+            
+            body:not(.web-version) .question-display {
+                font-size: 1.1em !important;
+                padding: 10px 15px !important;
+                margin-top: 3px !important;
+                line-height: 1.2 !important;
+            }
         }
         
         .game-title {
@@ -500,9 +555,104 @@
             font-weight: 800;
             cursor: pointer;
         }
+        
+        /* Mobile/Web Toggle Button */
+        .version-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: rgba(255, 207, 84, 0.9);
+            border: 2px solid var(--dark-blue);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+            font-size: 18px;
+            color: var(--dark-blue);
+        }
+        
+        .version-toggle:hover {
+            background: rgba(255, 207, 84, 1);
+            transform: scale(1.1);
+        }
+        
+        .version-toggle.web-mode {
+            background: rgba(76, 175, 80, 0.9);
+            color: white;
+        }
+        
+        .version-toggle.web-mode:hover {
+            background: rgba(76, 175, 80, 1);
+        }
+        
+        /* Web Version Styles */
+        body.web-version {
+            padding: 20px;
+            height: auto;
+            min-height: 100vh;
+        }
+        
+        body.web-version .game-header {
+            border-radius: 20px 20px 0 0;
+            margin-bottom: 0;
+            width: 900px;
+            max-width: 90vw;
+            margin: 0 auto;
+            padding: 15px 25px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-bottom: none;
+        }
+        
+        body.web-version .game-container {
+            width: 900px;
+            height: 600px;
+            max-width: 90vw;
+            max-height: 70vh;
+            margin: 0 auto;
+            border-radius: 0 0 20px 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            flex: none;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: none;
+        }
+        
+        body.web-version canvas {
+            width: 100% !important;
+            height: 100% !important;
+            max-width: none !important;
+            max-height: none !important;
+            border-radius: 0 0 16px 16px;
+        }
+        
+        body.web-version .game-title {
+            font-size: 1.8em;
+        }
+        
+        body.web-version .score-display {
+            font-size: 1.2em;
+            padding: 8px 15px;
+            min-width: 80px;
+        }
+        
+        body.web-version .question-display {
+            font-size: 1.3em;
+            padding: 15px 25px;
+            max-width: none;
+        }
     </style>
 </head>
 <body>
+    <!-- Mobile/Web Toggle Button -->
+    <button class="version-toggle" id="versionToggle" title="Switch to Web Version">
+        🖥️
+    </button>
+    
     <div class="game-header">
         <h1 class="game-title">Fishing Quiz</h1>
         <div class="game-info">
@@ -828,6 +978,35 @@
                 document.getElementById('fishingStartBtn').addEventListener('click', () => {
                     this.initAudio(); // Initialize audio on user interaction
                     document.getElementById('fishingHowTo').style.display = 'none';
+                });
+                
+                // Version toggle functionality
+                document.getElementById('versionToggle').addEventListener('click', function() {
+                    const body = document.body;
+                    const button = this;
+                    
+                    if (body.classList.contains('web-version')) {
+                        // Switch to mobile version
+                        body.classList.remove('web-version');
+                        button.classList.remove('web-mode');
+                        button.innerHTML = '🖥️';
+                        button.title = 'Switch to Web Version';
+                    } else {
+                        // Switch to web version
+                        body.classList.add('web-version');
+                        button.classList.add('web-mode');
+                        button.innerHTML = '📱';
+                        button.title = 'Switch to Mobile Version';
+                    }
+                    
+                    // Trigger canvas resize
+                    setTimeout(() => {
+                        const game = window.fishingGameInstance;
+                        if (game) {
+                            game.setupCanvas();
+                            game.initializeGameObjects();
+                        }
+                    }, 100);
                 });
                 
                 // Mouse/touch events
@@ -1580,7 +1759,7 @@
 
         // Initialize game when page loads
         document.addEventListener('DOMContentLoaded', () => {
-            new FishingQuiz();
+            window.fishingGameInstance = new FishingQuiz();
         });
     </script>
 </body>

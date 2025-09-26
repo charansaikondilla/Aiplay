@@ -31,6 +31,37 @@
             /* Mobile portrait optimization */
             -webkit-text-size-adjust: 100%;
             -ms-text-size-adjust: 100%;
+            /* Force portrait orientation on mobile */
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            /* Improved touch handling */
+            touch-action: manipulation;
+            -webkit-touch-callout: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        /* Portrait mode enforcement for mobile */
+        @media screen and (max-width: 768px) and (orientation: landscape) {
+            body::before {
+                content: "📱 Please rotate your device to portrait mode for the best experience!";
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.9);
+                color: white;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 9999;
+                font-size: 1.2em;
+                text-align: center;
+                padding: 20px;
+                box-sizing: border-box;
+            }
         }
         
         .game-container {
@@ -44,6 +75,37 @@
             /* Ensure proper mobile display */
             max-width: 100%;
             max-height: 100%;
+        }
+        
+        /* Mobile portrait optimizations */
+        @media screen and (max-width: 768px) {
+            .game-container {
+                width: 100vw;
+                height: 100vh;
+                min-height: 100vh;
+                position: fixed;
+                top: 0;
+                left: 0;
+            }
+            
+            .title {
+                font-size: 2.2em !important;
+                margin-bottom: 15px !important;
+            }
+            
+            .game-message {
+                font-size: 1.8em !important;
+                margin-bottom: 15px !important;
+                padding: 0 20px;
+            }
+            
+            .start-button, .restart-button, .small-button {
+                padding: 12px 25px !important;
+                font-size: 1.3em !important;
+                margin: 8px !important;
+                min-width: 120px;
+                touch-action: manipulation;
+            }
         }
         
         canvas {
@@ -269,9 +331,97 @@
             padding: 10px 15px;
         }
     }
+    
+    /* Mobile/Web Toggle Button */
+    .version-toggle {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1000;
+        background: rgba(255, 207, 84, 0.9);
+        border: 2px solid #1c273a;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        transition: all 0.3s ease;
+        font-size: 18px;
+        color: #1c273a;
+    }
+    
+    .version-toggle:hover {
+        background: rgba(255, 207, 84, 1);
+        transform: scale(1.1);
+    }
+    
+    .version-toggle.web-mode {
+        background: rgba(76, 175, 80, 0.9);
+        color: white;
+    }
+    
+    .version-toggle.web-mode:hover {
+        background: rgba(76, 175, 80, 1);
+    }
+    
+    /* Web Version Styles */
+    body.web-version {
+        padding: 20px;
+        height: auto;
+        min-height: 100vh;
+        background: linear-gradient(135deg, #1c273a, #a3daff);
+    }
+    
+    body.web-version .game-container {
+        width: 900px;
+        height: 600px;
+        max-width: 90vw;
+        max-height: 80vh;
+        margin: 0 auto;
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        position: relative;
+        top: auto;
+        left: auto;
+    }
+    
+    body.web-version canvas {
+        width: 100% !important;
+        height: 100% !important;
+        border-radius: 20px;
+    }
+    
+    body.web-version .title {
+        font-size: 3.2em;
+        margin-bottom: 25px;
+    }
+    
+    body.web-version .game-message {
+        font-size: 2.5em;
+        margin-bottom: 25px;
+        padding: 0 30px;
+    }
+    
+    body.web-version .start-button, 
+    body.web-version .restart-button, 
+    body.web-version .small-button {
+        padding: 16px 32px;
+        font-size: 1.5em;
+        margin: 12px;
+        min-width: 150px;
+    }
+    
     </style>
 </head>
 <body>
+    <!-- Mobile/Web Toggle Button -->
+    <button class="version-toggle" id="versionToggle" title="Switch to Web Version">
+        🖥️
+    </button>
+    
     <div class="game-container">
         <canvas id="gameCanvas"></canvas>
         <div class="ui-overlay" id="uiOverlay">
@@ -330,9 +480,9 @@
         const correctGreen = '#3ad39f';
 
         // Visual properties
-        const answerBoxWidth = 100;
-        const answerBoxHeight = 60;
-        const answerBoxMargin = 20;
+        let answerBoxWidth = 100;
+        let answerBoxHeight = 60;
+        let answerBoxMargin = 20;
 
         // Enhanced Game Sounds using Web Audio API
         let rocketAudioContext = null;
@@ -491,6 +641,31 @@
                             document.getElementById('rocketHowTo').style.display = 'none';
                             startGame();
                         });
+                        
+                        // Version toggle functionality
+                        document.getElementById('versionToggle').addEventListener('click', function() {
+                            const body = document.body;
+                            const button = this;
+                            
+                            if (body.classList.contains('web-version')) {
+                                // Switch to mobile version
+                                body.classList.remove('web-version');
+                                button.classList.remove('web-mode');
+                                button.innerHTML = '🖥️';
+                                button.title = 'Switch to Web Version';
+                            } else {
+                                // Switch to web version
+                                body.classList.add('web-version');
+                                button.classList.add('web-mode');
+                                button.innerHTML = '📱';
+                                button.title = 'Switch to Mobile Version';
+                            }
+                            
+                            // Trigger resize to adjust canvas
+                            setTimeout(() => {
+                                resizeCanvas();
+                            }, 100);
+                        });
             
             // Initialize game (no need to preload Web Audio API sounds)
             initTopicsAndSelection();
@@ -569,26 +744,29 @@
             canvas.style.height = containerHeight + 'px';
             ctx.scale(dpr, dpr);
             
-            // Mobile-responsive rocket positioning and sizing
+            // Enhanced mobile-responsive rocket positioning and sizing
             const isMobile = containerWidth < 768;
             const isPortrait = containerHeight > containerWidth;
+            const isWebVersion = document.body.classList.contains('web-version');
             
-            if (isMobile) {
-                rocket.w = Math.max(40, containerWidth / 12);
-                rocket.h = Math.max(60, containerWidth / 8);
+            if (isMobile && !isWebVersion) {
+                // Optimized for mobile portrait mode
+                rocket.w = Math.max(50, containerWidth / 10);
+                rocket.h = Math.max(75, containerWidth / 6.5);
                 rocket.x = containerWidth / 2 - rocket.w / 2;
-                rocket.y = containerHeight - rocket.h - (isPortrait ? 120 : 80);
+                rocket.y = containerHeight - rocket.h - (isPortrait ? 140 : 100);
             } else {
+                // Web version or desktop
                 rocket.w = 60;
                 rocket.h = 90;
                 rocket.x = containerWidth / 2 - rocket.w / 2;
                 rocket.y = containerHeight - rocket.h - 100;
             }
             
-            // Update answer box dimensions for mobile
-            if (isMobile) {
-                answerBoxWidth = Math.min(80, containerWidth / 5);
-                answerBoxHeight = Math.min(50, containerHeight / 12);
+            // Enhanced answer box dimensions for mobile portrait
+            if (isMobile && !isWebVersion) {
+                answerBoxWidth = Math.max(70, (containerWidth - 40) / 4 - 8);
+                answerBoxHeight = Math.max(55, containerHeight / 10);
                 answerBoxMargin = 8;
             } else {
                 answerBoxWidth = 100;
@@ -918,6 +1096,190 @@
 
                     drawAnswers();
                 }
+            }
+        }
+        
+        // Missing functions
+        function initTopicsAndSelection() {
+            // Load session data
+            selectedTopic = sessionStorage.getItem('aiplay_topic') || 'maths';
+            game1Score = parseInt(sessionStorage.getItem('aiplay_game1Score'), 10) || 0;
+            nextIndex = parseInt(sessionStorage.getItem('aiplay_nextIndex'), 10) || 3;
+            
+            // Load topics
+            topics = {
+                maths: {
+                    questions: [
+                        { text: 'What is 5 + 3?', answer: '8', options: ['7', '8', '9', '10'] },
+                        { text: 'What is 12 - 4?', answer: '8', options: ['6', '7', '8', '9'] },
+                        { text: 'What is 3 × 4?', answer: '12', options: ['10', '11', '12', '13'] },
+                        { text: 'What is 15 ÷ 3?', answer: '5', options: ['3', '4', '5', '6'] },
+                        { text: 'What is 7 + 6?', answer: '13', options: ['12', '13', '14', '15'] },
+                        { text: 'What is 20 - 8?', answer: '12', options: ['10', '11', '12', '13'] }
+                    ]
+                },
+                aiAgents: {
+                    questions: [
+                        { text: 'What do AI agents use to perceive?', answer: 'Sensors', options: ['Motors', 'Sensors', 'CPU', 'Memory'] },
+                        { text: 'What do AI agents use to act?', answer: 'Actuators', options: ['Sensors', 'Actuators', 'RAM', 'Display'] },
+                        { text: 'What guides AI agent behavior?', answer: 'Goals', options: ['Speed', 'Goals', 'Size', 'Color'] },
+                        { text: 'Simple reflex agent example?', answer: 'Thermostat', options: ['Robot', 'Thermostat', 'Computer', 'Phone'] },
+                        { text: 'AI agents learn from?', answer: 'Experience', options: ['Books', 'Experience', 'Movies', 'Games'] },
+                        { text: 'Popular AI agent type?', answer: 'Chatbot', options: ['Calculator', 'Chatbot', 'Camera', 'Speaker'] }
+                    ]
+                },
+                sql: {
+                    questions: [
+                        { text: 'SQL command to retrieve data?', answer: 'SELECT', options: ['GET', 'SELECT', 'FETCH', 'SHOW'] },
+                        { text: 'SQL command to add data?', answer: 'INSERT', options: ['ADD', 'INSERT', 'PUT', 'CREATE'] },
+                        { text: 'SQL command to modify data?', answer: 'UPDATE', options: ['CHANGE', 'UPDATE', 'MODIFY', 'ALTER'] },
+                        { text: 'SQL command to remove data?', answer: 'DELETE', options: ['REMOVE', 'DELETE', 'DROP', 'CLEAR'] },
+                        { text: 'SQL clause to filter results?', answer: 'WHERE', options: ['FILTER', 'WHERE', 'IF', 'WHEN'] },
+                        { text: 'SQL command to sort results?', answer: 'ORDER BY', options: ['SORT', 'ORDER BY', 'ARRANGE', 'RANK'] }
+                    ]
+                }
+            };
+            
+            loadQuestion();
+        }
+        
+        function loadQuestion() {
+            if (!topics || !selectedTopic || !topics[selectedTopic]) return;
+            
+            const topicQuestions = topics[selectedTopic].questions;
+            if (nextIndex + qIndex >= topicQuestions.length) return;
+            
+            const q = topicQuestions[nextIndex + qIndex];
+            question.text = q.text;
+            question.answer = q.answer;
+            answers = [...q.options];
+        }
+        
+        function handleInput(e) {
+            if (gameState !== 'playing') return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            checkAnswerClick(x, y);
+        }
+        
+        function handleTouchInput(e) {
+            e.preventDefault();
+            if (gameState !== 'playing') return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const touch = e.touches[0];
+            const x = touch.clientX - rect.left;
+            const y = touch.clientY - rect.top;
+            
+            checkAnswerClick(x, y);
+        }
+        
+        function checkAnswerClick(x, y) {
+            if (resolving) return;
+            
+            const container = document.querySelector('.game-container');
+            const canvasWidth = container.clientWidth;
+            const canvasHeight = container.clientHeight;
+            const isMobile = canvasWidth < 768;
+            
+            const boxWidth = isMobile ? Math.min(80, canvasWidth / 5) : answerBoxWidth;
+            const boxHeight = isMobile ? Math.min(50, canvasHeight / 12) : answerBoxHeight;
+            const margin = isMobile ? 8 : answerBoxMargin;
+            
+            const totalWidth = (boxWidth * 4) + (margin * 3);
+            const startX = (canvasWidth - totalWidth) / 2;
+            const boxY = canvasHeight - boxHeight - (isMobile ? 20 : 40);
+            
+            for (let i = 0; i < answers.length; i++) {
+                const boxX = startX + i * (boxWidth + margin);
+                
+                if (x >= boxX && x <= boxX + boxWidth && y >= boxY && y <= boxY + boxHeight) {
+                    selectAnswer(answers[i]);
+                    break;
+                }
+            }
+        }
+        
+        function selectAnswer(selected) {
+            if (resolving) return;
+            resolving = true;
+            
+            if (selected === question.answer) {
+                game2Score++;
+                playCorrectSound();
+                gameMessage.textContent = 'Correct! 🚀';
+                rocket.withFire = true;
+                gameState = 'flying';
+            } else {
+                playCrashSound();
+                gameMessage.textContent = 'Wrong Answer! 💥';
+                gameState = 'crashing';
+                rocket.fallingSpeed = 2;
+            }
+            
+            gameMessage.style.display = 'block';
+            
+            setTimeout(() => {
+                qIndex++;
+                if (qIndex >= qCountGame2) {
+                    endGame();
+                } else {
+                    loadQuestion();
+                    resetForNextQuestion();
+                }
+            }, 2000);
+        }
+        
+        function resetForNextQuestion() {
+            gameState = 'playing';
+            rocket.withFire = false;
+            rocket.shake = 0;
+            rocket.fallingSpeed = 0;
+            gameMessage.style.display = 'none';
+            resolving = false;
+        }
+        
+        function endGame() {
+            gameState = 'end';
+            sessionStorage.setItem('aiplay_game2Score', String(game2Score));
+            sessionStorage.setItem('aiplay_nextIndex', String(nextIndex + qCountGame2));
+            
+            totalScore = game1Score + game2Score;
+            gameMessage.innerHTML = `Game Complete!<br>Score: ${game2Score}/${qCountGame2}`;
+            gameMessage.style.display = 'block';
+            
+            document.getElementById('scorePanel').innerHTML = `
+                <div>Game 1: ${game1Score}/3</div>
+                <div>Game 2: ${game2Score}/3</div>
+                <div>Total: ${totalScore}/6</div>
+            `;
+            document.getElementById('scorePanel').style.display = 'block';
+            document.getElementById('endButtons').style.display = 'flex';
+        }
+        
+        function startGame() {
+            gameState = 'playing';
+            startButton.style.display = 'none';
+            gameMessage.style.display = 'none';
+        }
+        
+        function update(deltaTime) {
+            rocket.animFrame += deltaTime * 10;
+            
+            if (gameState === 'flying') {
+                rocket.y -= 100 * deltaTime;
+                if (rocket.y < -rocket.h) {
+                    rocket.y = canvas.height - rocket.h - 100;
+                    gameState = 'playing';
+                    rocket.withFire = false;
+                }
+            } else if (gameState === 'crashing') {
+                rocket.y += rocket.fallingSpeed * deltaTime * 60;
+                rocket.shake = Math.sin(rocket.animFrame) * 5;
+                rocket.fallingSpeed += deltaTime * 2;
             }
         }
     </script>
