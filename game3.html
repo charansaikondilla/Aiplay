@@ -31,55 +31,69 @@
             display: flex;
             flex-direction: column;
             height: 100vh;
+            /* Mobile portrait optimization */
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
         }
         
         .game-header {
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
+            justify-content: center;
             align-items: center;
-            padding: 10px 20px;
-            background: rgba(255, 255, 255, 0.9);
+            padding: 12px 20px;
+            background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
             border-bottom: 2px solid rgba(255, 255, 255, 0.3);
             z-index: 20;
+            min-height: 80px;
         }
         
         .game-title {
             font-family: 'Poppins', sans-serif;
-            font-size: 1.8em;
+            font-size: 1.6em;
             font-weight: 700;
             color: var(--dark-blue);
-            margin: 0;
+            margin: 0 0 8px 0;
+            text-align: center;
         }
 
         .game-info {
             display: flex;
             align-items: center;
-            gap: 20px;
+            justify-content: center;
+            gap: 15px;
+            width: 100%;
+            flex-wrap: wrap;
         }
 
         .score-display {
-            font-size: 1.2em;
+            font-size: 1.1em;
             font-weight: 700;
             color: var(--dark-blue);
             background: rgba(255, 255, 255, 0.7);
-            padding: 8px 16px;
-            border-radius: 12px;
+            padding: 6px 12px;
+            border-radius: 10px;
             border: 2px solid rgba(255, 255, 255, 0.5);
-            min-width: 80px;
+            min-width: 70px;
             text-align: center;
         }
 
         .question-display {
-            font-size: 1.1em;
-            font-weight: 600;
+            font-size: 1.2em;
+            font-weight: 700;
             color: var(--dark-blue);
-            background: rgba(255, 255, 255, 0.8);
-            padding: 10px 16px;
-            border-radius: 12px;
-            border: 2px solid rgba(255, 255, 255, 0.5);
-            max-width: 400px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.8));
+            padding: 12px 20px;
+            border-radius: 15px;
+            border: 3px solid rgba(76, 175, 80, 0.3);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
             text-align: center;
+            width: 100%;
+            max-width: 100%;
+            margin-top: 5px;
+            word-wrap: break-word;
+            line-height: 1.3;
         }
         
         .game-container {
@@ -95,9 +109,13 @@
             border: 3px solid rgba(255, 255, 255, 0.8);
             border-radius: 16px;
             cursor: grab;
-            max-width: calc(100vw - 40px);
-            max-height: calc(100vh - 140px);
+            width: 100%;
+            height: 100%;
+            max-width: calc(100vw - 20px);
+            max-height: calc(100vh - 200px);
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            touch-action: none;
+            -webkit-tap-highlight-color: transparent;
         }
         
         canvas:active {
@@ -267,47 +285,162 @@
             padding: 10px 16px;
         }
 
-        /* Mobile optimizations */
+        /* Mobile Portrait Optimization */
         @media (max-width: 768px) {
+            body {
+                height: 100vh;
+                width: 100vw;
+            }
+
             .game-header {
-                flex-direction: column;
-                gap: 10px;
-                padding: 12px 16px;
+                padding: 10px 15px;
+                min-height: 100px;
             }
 
             .game-title {
-                font-size: 1.4em;
+                font-size: 1.3em;
+                margin-bottom: 6px;
             }
 
-            .score-display, .question-display {
+            .game-info {
+                gap: 10px;
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .score-display {
                 font-size: 1em;
-                padding: 6px 12px;
+                padding: 5px 10px;
+                min-width: 60px;
             }
 
             .question-display {
-                max-width: 280px;
+                font-size: 1.1em;
+                padding: 10px 15px;
+                margin-top: 3px;
+                border-width: 2px;
+            }
+
+            .game-container {
+                flex: 1;
             }
 
             canvas {
-                max-width: calc(100vw - 20px);
-                max-height: calc(100vh - 180px);
+                max-width: calc(100vw - 15px);
+                max-height: calc(100vh - 220px);
+                border-radius: 12px;
+                border-width: 2px;
+            }
+
+            .start-button, .restart-button, .end-button {
+                font-size: 1.2em;
+                padding: 12px 24px;
+                margin: 8px;
             }
 
             .feedback-text {
-                font-size: 2em;
-                padding: 12px 20px;
+                font-size: 1.8em;
+                padding: 10px 16px;
             }
 
             .instructions {
-                font-size: 12px;
-                padding: 8px 16px;
-                bottom: 10px;
+                font-size: 11px;
+                padding: 6px 12px;
+                bottom: 8px;
             }
 
             .fish-guide {
-                position: static;
-                margin: 10px auto 0;
-                max-width: 200px;
+                position: absolute;
+                bottom: 50px;
+                right: 10px;
+                padding: 8px 10px;
+                font-size: 10px;
+            }
+
+            .fish-item {
+                margin: 2px 0;
+                gap: 5px;
+            }
+
+            .fish-icon {
+                width: 16px;
+                height: 10px;
+            }
+        }
+
+        @media (max-width: 480px) and (orientation: portrait) {
+            .game-header {
+                padding: 8px 12px;
+                min-height: 90px;
+            }
+
+            .game-title {
+                font-size: 1.2em;
+                margin-bottom: 5px;
+            }
+
+            .question-display {
+                font-size: 1em;
+                padding: 8px 12px;
+                line-height: 1.2;
+            }
+
+            .score-display {
+                font-size: 0.9em;
+                padding: 4px 8px;
+            }
+
+            canvas {
+                max-width: calc(100vw - 10px);
+                max-height: calc(100vh - 200px);
+                border-radius: 10px;
+            }
+
+            .start-button, .restart-button, .end-button {
+                font-size: 1.1em;
+                padding: 10px 20px;
+                margin: 6px;
+            }
+
+            .feedback-text {
+                font-size: 1.6em;
+                padding: 8px 14px;
+            }
+
+            .instructions {
+                font-size: 10px;
+                padding: 4px 8px;
+                bottom: 5px;
+            }
+
+            .fish-guide {
+                bottom: 40px;
+                right: 8px;
+                padding: 6px 8px;
+                font-size: 9px;
+            }
+
+            .score-panel {
+                padding: 15px;
+                margin: 10px;
+            }
+
+            .modal-card {
+                padding: 15px;
+                width: min(95vw, 400px);
+            }
+        }
+
+        /* Portrait orientation specific adjustments */
+        @media (orientation: portrait) {
+            .game-container {
+                align-items: stretch;
+            }
+            
+            canvas {
+                width: 100%;
+                height: auto;
+                aspect-ratio: 3/4;
             }
         }
 
@@ -469,6 +602,22 @@
                 this.initializeGameObjects();
                 this.setupEventHandlers();
                 
+                // Handle window resize for mobile rotation
+                window.addEventListener('resize', () => {
+                    setTimeout(() => {
+                        this.setupCanvas();
+                        this.initializeGameObjects();
+                    }, 100);
+                });
+                
+                // Handle orientation change
+                window.addEventListener('orientationchange', () => {
+                    setTimeout(() => {
+                        this.setupCanvas();
+                        this.initializeGameObjects();
+                    }, 300);
+                });
+                
                 // Start animation loop
                 this.animate();
                 
@@ -616,8 +765,34 @@
                 }
             }
             
+            setupCanvas() {
+                // Mobile-responsive canvas setup
+                const container = this.canvas.parentElement;
+                const containerRect = container.getBoundingClientRect();
+                const isMobile = window.innerWidth < 768;
+                const isPortrait = window.innerHeight > window.innerWidth;
+                
+                // Set canvas size based on container and device type
+                if (isMobile && isPortrait) {
+                    // Portrait mobile - use full available space
+                    this.canvas.width = Math.min(containerRect.width - 20, 400);
+                    this.canvas.height = Math.min(containerRect.height - 20, 500);
+                } else if (isMobile) {
+                    // Landscape mobile
+                    this.canvas.width = Math.min(containerRect.width - 40, 600);
+                    this.canvas.height = Math.min(containerRect.height - 40, 400);
+                } else {
+                    // Desktop
+                    this.canvas.width = gameConfig.canvasWidth;
+                    this.canvas.height = gameConfig.canvasHeight;
+                }
+                
+                // Update water surface based on canvas height
+                this.waterSurface = this.canvas.height - Math.min(450, this.canvas.height * 0.75);
+            }
+            
             initializeGameObjects() {
-                this.waterSurface = this.canvas.height - 450;
+                this.setupCanvas();
                 this.boat = { x: 200, y: this.waterSurface - 50, width: 120, height: 40, sway: 0 };
                 this.fisherman = { x: 250, y: this.waterSurface - 80, state: 'idle' };
                 this.rodTip = { x: 285, y: this.waterSurface - 95 };
@@ -694,7 +869,11 @@
                     Math.pow(mousePos.x - this.hook.x, 2) + Math.pow(mousePos.y - this.hook.y, 2)
                 );
                 
-                if (hookDistance <= this.hook.radius + 15) {
+                // Larger touch area for mobile
+                const isMobile = window.innerWidth < 768;
+                const touchRadius = isMobile ? 30 : 15;
+                
+                if (hookDistance <= this.hook.radius + touchRadius) {
                     this.hook.isDragging = true;
                     this.mouseDown = true;
                     this.dragOffset.x = mousePos.x - this.hook.x;
@@ -788,17 +967,32 @@
                     const answerText = shuffledOptions[i];
                     const isCorrect = answerText === currentQ.answer;
                     
-                    // Calculate fish size based on text length
+                    // Calculate fish size based on text length and screen size
                     const textLength = answerText.length;
-                    const baseWidth = 120;
-                    const baseHeight = 80;
-                    const width = Math.max(baseWidth, Math.min(200, baseWidth + textLength * 8));
-                    const height = Math.max(baseHeight, Math.min(120, baseHeight + textLength * 2));
+                    const isMobile = window.innerWidth < 768;
+                    const canvasScale = Math.min(this.canvas.width / 900, this.canvas.height / 600);
                     
-                    // Calculate font size based on fish size and screen size
-                    const baseFontSize = Math.max(14, Math.min(20, width / (textLength + 2)));
-                    const screenScale = Math.min(window.innerWidth / 900, window.innerHeight / 600);
-                    const fontSize = Math.max(12, baseFontSize * Math.max(0.8, screenScale));
+                    let baseWidth, baseHeight;
+                    if (isMobile) {
+                        baseWidth = Math.max(80, this.canvas.width / 8);
+                        baseHeight = Math.max(50, this.canvas.height / 12);
+                    } else {
+                        baseWidth = 120;
+                        baseHeight = 80;
+                    }
+                    
+                    const width = Math.max(baseWidth, Math.min(baseWidth * 2, baseWidth + textLength * (isMobile ? 4 : 8)));
+                    const height = Math.max(baseHeight, Math.min(baseHeight * 1.5, baseHeight + textLength * (isMobile ? 1 : 2)));
+                    
+                    // Calculate font size based on fish size and mobile optimization
+                    let baseFontSize;
+                    if (isMobile) {
+                        baseFontSize = Math.max(10, Math.min(16, width / (textLength + 1)));
+                    } else {
+                        baseFontSize = Math.max(14, Math.min(20, width / (textLength + 2)));
+                    }
+                    
+                    const fontSize = Math.max(isMobile ? 10 : 12, baseFontSize * canvasScale);
                     
                     // Position fish at different depths
                     const yPosition = waterTop + (i * waterHeight / gameConfig.fishCount) + Math.random() * 60;
@@ -852,8 +1046,10 @@
                         Math.pow(this.hook.y - fishCenterY, 2)
                     );
                     
-                    // Larger collision area for bigger fish
-                    const collisionRadius = Math.max(40, fish.width / 3);
+                    // Mobile-friendly collision detection
+                    const isMobile = window.innerWidth < 768;
+                    const baseRadius = isMobile ? 50 : 40;
+                    const collisionRadius = Math.max(baseRadius, fish.width / (isMobile ? 2.5 : 3));
                     
                     if (distance < collisionRadius) {
                         fish.caught = true;

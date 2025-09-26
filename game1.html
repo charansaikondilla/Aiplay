@@ -28,6 +28,9 @@
             font-family: 'Nunito', sans-serif;
             color: var(--dark-blue);
             overflow: hidden;
+            /* Mobile portrait optimization */
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
         }
         
         .game-container {
@@ -38,6 +41,9 @@
             overflow: hidden;
             box-shadow: none;
             background: transparent;
+            /* Ensure proper mobile display */
+            max-width: 100%;
+            max-height: 100%;
         }
         
         canvas {
@@ -47,6 +53,10 @@
             background: transparent;
             touch-action: none;
             -webkit-tap-highlight-color: transparent;
+            /* Mobile canvas optimization */
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: optimize-contrast;
+            -ms-interpolation-mode: nearest-neighbor;
         }
         
         .ui-overlay {
@@ -170,6 +180,95 @@
     .modal-list { margin:6px 0 0 18px; padding:0; color:#23465f; font-size:14px; }
     .modal-actions { margin-top:12px; display:flex; gap:10px; justify-content:flex-end; }
     .modal-btn { padding:10px 14px; border:0; border-radius:10px; background:#ffcf54; color:#1c273a; font-weight:800; }
+    
+    /* Enhanced Mobile Portrait Optimization */
+    @media (max-width: 768px) and (orientation: portrait) {
+        body {
+            height: 100vh;
+            width: 100vw;
+        }
+        
+        .game-container {
+            width: 100vw;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+        
+        canvas {
+            width: 100vw !important;
+            height: 100vh !important;
+        }
+        
+        .title {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+        
+        .game-message {
+            font-size: 2em;
+            margin-bottom: 20px;
+            padding: 0 15px;
+            line-height: 1.2;
+        }
+        
+        .start-button, .restart-button {
+            padding: 15px 30px;
+            font-size: 1.4em;
+            margin: 10px;
+            min-width: 160px;
+        }
+        
+        .small-button {
+            padding: 12px 20px;
+            font-size: 1.1em;
+            margin: 8px;
+            min-width: 120px;
+        }
+        
+        .ui-overlay {
+            padding: 30px 20px;
+        }
+        
+        .score-panel {
+            font-size: 1.2em;
+            padding: 12px 18px;
+            margin-top: 15px;
+        }
+    }
+
+    @media (max-width: 480px) and (orientation: portrait) {
+        .title {
+            font-size: 2em;
+            margin-bottom: 15px;
+        }
+        
+        .game-message {
+            font-size: 1.6em;
+            margin-bottom: 15px;
+            padding: 0 10px;
+        }
+        
+        .start-button, .restart-button {
+            padding: 12px 24px;
+            font-size: 1.2em;
+            margin: 8px;
+            min-width: 140px;
+        }
+        
+        .small-button {
+            padding: 10px 18px;
+            font-size: 1em;
+            margin: 6px;
+            min-width: 100px;
+        }
+        
+        .score-panel {
+            font-size: 1.1em;
+            padding: 10px 15px;
+        }
+    }
     </style>
 </head>
 <body>
@@ -459,14 +558,43 @@
 
         function resizeCanvas() {
             const container = document.querySelector('.game-container');
+            const containerWidth = container.clientWidth;
+            const containerHeight = container.clientHeight;
             const dpr = window.devicePixelRatio || 1;
-            canvas.width = container.clientWidth * dpr;
-            canvas.height = container.clientHeight * dpr;
-            canvas.style.width = container.clientWidth + 'px';
-            canvas.style.height = container.clientHeight + 'px';
+            
+            // Set canvas dimensions with device pixel ratio for crisp display
+            canvas.width = containerWidth * dpr;
+            canvas.height = containerHeight * dpr;
+            canvas.style.width = containerWidth + 'px';
+            canvas.style.height = containerHeight + 'px';
             ctx.scale(dpr, dpr);
-            rocket.x = container.clientWidth / 2;
-            rocket.y = container.clientHeight / 2;
+            
+            // Mobile-responsive rocket positioning and sizing
+            const isMobile = containerWidth < 768;
+            const isPortrait = containerHeight > containerWidth;
+            
+            if (isMobile) {
+                rocket.w = Math.max(40, containerWidth / 12);
+                rocket.h = Math.max(60, containerWidth / 8);
+                rocket.x = containerWidth / 2 - rocket.w / 2;
+                rocket.y = containerHeight - rocket.h - (isPortrait ? 120 : 80);
+            } else {
+                rocket.w = 60;
+                rocket.h = 90;
+                rocket.x = containerWidth / 2 - rocket.w / 2;
+                rocket.y = containerHeight - rocket.h - 100;
+            }
+            
+            // Update answer box dimensions for mobile
+            if (isMobile) {
+                answerBoxWidth = Math.min(80, containerWidth / 5);
+                answerBoxHeight = Math.min(50, containerHeight / 12);
+                answerBoxMargin = 8;
+            } else {
+                answerBoxWidth = 100;
+                answerBoxHeight = 60;
+                answerBoxMargin = 10;
+            }
         }
 
         // Main game loop
