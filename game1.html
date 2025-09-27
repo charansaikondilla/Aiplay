@@ -176,66 +176,101 @@
                 left: 0 !important;
                 margin: 0 !important;
                 padding: 0 !important;
-                background: #000 !important; /* Instagram Reel black background */
-                display: flex !important;
-                justify-content: center !important;
-                align-items: center !important;
+                background: linear-gradient(to bottom, var(--dark-blue) 0%, var(--sky-blue) 100%) !important;
+                display: block !important;
             }
             
             body.mobile-version .game-container {
+                position: fixed !important;
+                top: 0 !important;
+                left: 0 !important;
                 width: 100vw !important;
-                height: 177.78vw !important; /* Perfect 9:16 ratio */
-                max-height: 100vh !important;
-                max-width: 56.25vh !important; /* 9:16 ratio for height constraint */
-                position: relative !important;
+                height: 100vh !important;
                 background: linear-gradient(to bottom, var(--dark-blue) 0%, var(--sky-blue) 100%) !important;
-                border-radius: 20px !important;
+                border-radius: 0 !important;
                 overflow: hidden !important;
+                margin: 0 !important;
+                padding: 0 !important;
                 overflow: hidden !important;
                 box-shadow: 0 0 30px rgba(163,218,255,0.4) !important;
                 border: 3px solid rgba(255,255,255,0.3) !important;
             }
             
             body.mobile-version canvas {
-                width: 100% !important;
-                height: 100% !important;
-                position: relative !important;
+                position: fixed !important;
                 top: 0 !important;
                 left: 0 !important;
-                border-radius: 15px !important;
+                width: 100vw !important;
+                height: 100vh !important;
+                border-radius: 0 !important;
                 margin: 0 !important;
                 padding: 0 !important;
+                z-index: 1 !important;
             }
             
             body.mobile-version .title {
-                font-size: 1.8em !important;
-                margin-bottom: 12px !important;
-                padding: 0 15px !important;
-                text-shadow: 2px 2px 8px rgba(0,0,0,0.5) !important;
+                position: fixed !important;
+                top: 5% !important;
+                left: 50% !important;
+                transform: translateX(-50%) !important;
+                font-size: 2.2em !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                text-shadow: 3px 3px 6px rgba(0,0,0,0.5) !important;
+                color: var(--accent-yellow) !important;
+                z-index: 1000 !important;
+                text-align: center !important;
+                width: 90% !important;
             }
             
             body.mobile-version .game-message {
+                position: fixed !important;
+                top: 15% !important;
+                left: 50% !important;
+                transform: translateX(-50%) !important;
                 font-size: 1.4em !important;
-                margin-bottom: 12px !important;
-                padding: 0 15px !important;
-                text-shadow: 2px 2px 8px rgba(0,0,0,0.5) !important;
+                margin: 0 !important;
+                text-align: center !important;
+                padding: 15px 25px !important;
+                background: rgba(255, 255, 255, 0.95) !important;
+                border-radius: 20px !important;
+                color: var(--dark-blue) !important;
+                box-shadow: 0 6px 20px rgba(0,0,0,0.3) !important;
+                z-index: 1000 !important;
+                width: 85% !important;
+                max-width: 400px !important;
+                text-shadow: none !important;
             }
             
             body.mobile-version .start-button, 
             body.mobile-version .restart-button {
-                font-size: 1.2em !important;
-                padding: 12px 25px !important;
-                margin: 8px !important;
-                min-width: 130px !important;
+                position: fixed !important;
+                bottom: 15% !important;
+                left: 50% !important;
+                transform: translateX(-50%) !important;
+                font-size: 1.3em !important;
+                padding: 15px 35px !important;
+                margin: 0 !important;
+                border-radius: 30px !important;
+                min-width: 200px !important;
+                box-shadow: 0 8px 25px rgba(0,0,0,0.3) !important;
+                z-index: 1000 !important;
+                width: auto !important;
                 border-radius: 20px !important;
                 box-shadow: 0 6px 15px rgba(255,207,84,0.4) !important;
             }
             
             body.mobile-version .small-button {
-                font-size: 1em !important;
-                padding: 10px 20px !important;
-                min-width: 110px !important;
-                border-radius: 15px !important;
+                position: fixed !important;
+                bottom: 5% !important;
+                left: 50% !important;
+                transform: translateX(-50%) !important;
+                font-size: 1.1em !important;
+                padding: 12px 25px !important;
+                min-width: 150px !important;
+                border-radius: 20px !important;
+                z-index: 1000 !important;
+                box-shadow: 0 6px 20px rgba(0,0,0,0.3) !important;
             }
         }
 
@@ -388,7 +423,7 @@
 
         // Game State Variables
         let gameState = 'start';
-        let rocket = { x: 0, y: 0, w: 70, h: 100, animFrame: 0, withFire: false, shake: 0, fallingSpeed: 0 };
+        let rocket = { x: 0, y: 0, w: 80, h: 120, animFrame: 0, withFire: false, shake: 0, fallingSpeed: 0 }; // Larger for better mobile visibility
     let question = { text: '', answer: '' };
     let answers = [];
     let game1Score = 0; // from game 1
@@ -613,15 +648,29 @@
                 }
 
         function resizeCanvas() {
-            const container = document.querySelector('.game-container');
+            const isMobile = document.body.classList.contains('mobile-version');
             const dpr = window.devicePixelRatio || 1;
-            canvas.width = container.clientWidth * dpr;
-            canvas.height = container.clientHeight * dpr;
-            canvas.style.width = container.clientWidth + 'px';
-            canvas.style.height = container.clientHeight + 'px';
-            ctx.scale(dpr, dpr);
-            rocket.x = container.clientWidth / 2;
-            rocket.y = container.clientHeight / 2;
+            
+            if (isMobile) {
+                // Full-screen mobile canvas
+                canvas.width = window.innerWidth * dpr;
+                canvas.height = window.innerHeight * dpr;
+                canvas.style.width = window.innerWidth + 'px';
+                canvas.style.height = window.innerHeight + 'px';
+                ctx.scale(dpr, dpr);
+                rocket.x = window.innerWidth / 2;
+                rocket.y = window.innerHeight / 2;
+            } else {
+                // Desktop version
+                const container = document.querySelector('.game-container');
+                canvas.width = container.clientWidth * dpr;
+                canvas.height = container.clientHeight * dpr;
+                canvas.style.width = container.clientWidth + 'px';
+                canvas.style.height = container.clientHeight + 'px';
+                ctx.scale(dpr, dpr);
+                rocket.x = container.clientWidth / 2;
+                rocket.y = container.clientHeight / 2;
+            }
         }
 
         // Main game loop
@@ -1026,6 +1075,14 @@
         document.addEventListener('DOMContentLoaded', function() {
             initializeMobileOptimization();
             adjustCanvasForMobile();
+            
+            // Initialize canvas and rocket after mobile detection
+            setTimeout(() => {
+                resizeCanvas();
+                if (typeof draw === 'function') {
+                    draw(); // Initial draw to show rocket
+                }
+            }, 100);
         });
 
         // RESPONSIVE CANVAS ADJUSTMENT
