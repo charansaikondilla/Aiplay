@@ -184,8 +184,7 @@
         /* MOBILE VERSION STYLES */
         @media screen and (max-width: 768px), (pointer: coarse) {
             body.mobile-version .game-header {
-                padding: 8px 15px;
-                gap: 20px;
+                display: none !important; /* Hidden for Instagram Reel format */
             }
             
             body.mobile-version .game-title {
@@ -232,13 +231,13 @@
             }
             
             body.mobile-version canvas {
-                position: fixed !important;
+                position: relative !important;
                 top: 0 !important;
                 left: 0 !important;
-                width: 100vw !important;
-                height: 100vh !important;
+                width: 100% !important;
+                height: 100% !important;
                 border: none !important;
-                border-radius: 0 !important;
+                border-radius: 15px !important;
                 box-shadow: none !important;
             }
             
@@ -526,33 +525,48 @@
             cursor: pointer;
         }
 
-        /* WEB VERSION STYLES - FULL SCREEN */
+        /* WEB VERSION STYLES - DESKTOP DESIGN */
         body.web-version {
-            padding: 0;
+            padding: 20px;
             background: linear-gradient(135deg, var(--sky-blue), var(--water-light));
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        body.web-version .game-header {
+            display: block;
+            width: 1000px;
+            max-width: 95vw;
+            margin: 0 auto 0 auto;
+            padding: 20px 30px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 25px 25px 0 0;
+            border: 4px solid rgba(255, 255, 255, 0.4);
+            border-bottom: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
         
         body.web-version .game-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: transparent;
-            border: none;
-            border-radius: 0;
-            box-shadow: none;
-            margin: 0;
+            width: 1000px;
+            height: 700px;
+            max-width: 95vw;
+            max-height: 80vh;
+            margin: 0 auto;
+            background: linear-gradient(135deg, var(--sky-blue), var(--water-light));
+            border: 4px solid rgba(255, 255, 255, 0.4);
+            border-radius: 0 0 25px 25px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.4);
+            border-top: none;
+            position: relative;
         }
         
         body.web-version canvas {
-            position: fixed !important;
-            top: 0 !important;
-            left: 0 !important;
-            width: 100vw !important;
-            height: 100vh !important;
+            width: 100% !important;
+            height: 100% !important;
             border: none !important;
-            border-radius: 0 !important;
+            border-radius: 0 0 20px 20px !important;
             box-shadow: none !important;
         }
         
@@ -1640,33 +1654,38 @@
             }
         }
 
-        // MOBILE DETECTION AND OPTIMIZATION SYSTEM
+        // ENHANCED MOBILE DETECTION SYSTEM
         function detectMobileDevice() {
             const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
             const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
             const isSmallScreen = window.innerWidth <= 768;
             const isPortrait = window.innerHeight > window.innerWidth;
+            const isMobileScreen = window.innerWidth < 1024; // More accurate mobile detection
             
             return {
-                isMobile: isMobileUA || isTouchDevice || isSmallScreen,
+                isMobile: isMobileUA || (isTouchDevice && isSmallScreen) || isMobileScreen,
                 isTouch: isTouchDevice,
                 isPortrait: isPortrait,
                 screenWidth: window.innerWidth,
-                screenHeight: window.innerHeight
+                screenHeight: window.innerHeight,
+                deviceType: isMobileUA || isMobileScreen ? 'mobile' : 'desktop'
             };
         }
 
-        // AUTO-DETECT MOBILE AND APPLY FULL-SCREEN VERSION
+        // AUTO-DETECT AND APPLY APPROPRIATE VERSION
         function initializeMobileOptimization() {
             const deviceInfo = detectMobileDevice();
             
-            // Always auto-detect and apply appropriate version
+            // Clear any existing classes
+            document.body.classList.remove('mobile-version', 'web-version', 'mobile-detected');
+            
+            // Apply appropriate version based on detection
             if (deviceInfo.isMobile) {
                 document.body.classList.add('mobile-version', 'mobile-detected');
-                console.log('Mobile device detected - applying mobile full-screen version');
+                console.log(`📱 MOBILE DETECTED - Instagram Reel Format Applied (${deviceInfo.screenWidth}x${deviceInfo.screenHeight})`);
             } else {
                 document.body.classList.add('web-version');
-                console.log('Desktop device detected - applying web version');
+                console.log(`🖥️ DESKTOP DETECTED - Full Desktop Design Applied (${deviceInfo.screenWidth}x${deviceInfo.screenHeight})`);
             }
         }
 

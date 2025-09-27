@@ -93,20 +93,23 @@
                 overflow: hidden !important;
                 top: 0 !important;
                 left: 0 !important;
-                background: #000 !important; /* Black bars for Instagram feel */
+                background: #000 !important; /* Instagram Reel black background */
                 display: flex !important;
                 justify-content: center !important;
                 align-items: center !important;
+                margin: 0 !important;
+                padding: 0 !important;
             }
             
             body.mobile-version #gameContainer {
                 width: 100vw !important;
-                height: 178vw !important; /* 9:16 ratio = width * 1.778 */
+                height: 177.78vw !important; /* Perfect 9:16 ratio */
                 max-height: 100vh !important;
-                max-width: 56.25vh !important; /* 9:16 ratio = height * 0.5625 */
+                max-width: 56.25vh !important; /* 9:16 ratio for height constraint */
                 position: relative !important;
                 background: linear-gradient(to bottom, #87CEEB 0%, #B0E0E6 50%, #E0F6FF 100%) !important;
-                border-radius: 25px !important;
+                border-radius: 20px !important;
+                overflow: hidden !important;
                 overflow: hidden !important;
                 box-shadow: 0 0 30px rgba(255,255,255,0.3) !important;
                 border: 3px solid rgba(255,255,255,0.5) !important;
@@ -491,11 +494,11 @@
         }
         
         body.web-version #gameContainer {
-            width: 900px;
-            height: 600px;
-            max-width: 90vw;
+            width: 1000px;
+            height: 700px;
+            max-width: 95vw;
             max-height: 80vh;
-            border-radius: 20px;
+            border-radius: 25px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.3);
             overflow: hidden;
             border: 3px solid rgba(255, 255, 255, 0.2);
@@ -996,33 +999,38 @@ SELECT Name, Age FROM Students WHERE Grade = 'A';
           sessionStorage.removeItem('aiplay_nextIndex');
         });
 
-        // MOBILE DETECTION AND OPTIMIZATION SYSTEM
+        // ENHANCED MOBILE DETECTION SYSTEM
         function detectMobileDevice() {
             const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
             const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
             const isSmallScreen = window.innerWidth <= 768;
             const isPortrait = window.innerHeight > window.innerWidth;
+            const isMobileScreen = window.innerWidth < 1024; // More accurate mobile detection
             
             return {
-                isMobile: isMobileUA || isTouchDevice || isSmallScreen,
+                isMobile: isMobileUA || (isTouchDevice && isSmallScreen) || isMobileScreen,
                 isTouch: isTouchDevice,
                 isPortrait: isPortrait,
                 screenWidth: window.innerWidth,
-                screenHeight: window.innerHeight
+                screenHeight: window.innerHeight,
+                deviceType: isMobileUA || isMobileScreen ? 'mobile' : 'desktop'
             };
         }
 
-        // AUTO-DETECT MOBILE AND APPLY FULL-SCREEN VERSION
+        // AUTO-DETECT AND APPLY APPROPRIATE VERSION
         function initializeMobileOptimization() {
             const deviceInfo = detectMobileDevice();
             
-            // Always auto-detect and apply appropriate version
+            // Clear any existing classes
+            document.body.classList.remove('mobile-version', 'web-version', 'mobile-detected');
+            
+            // Apply appropriate version based on detection
             if (deviceInfo.isMobile) {
                 document.body.classList.add('mobile-version', 'mobile-detected');
-                console.log('Mobile device detected - applying mobile full-screen version');
+                console.log(`📱 MOBILE DETECTED - Instagram Reel Format Applied (${deviceInfo.screenWidth}x${deviceInfo.screenHeight})`);
             } else {
                 document.body.classList.add('web-version');
-                console.log('Desktop device detected - applying web version');
+                console.log(`🖥️ DESKTOP DETECTED - Full Desktop Design Applied (${deviceInfo.screenWidth}x${deviceInfo.screenHeight})`);
             }
         }
 
