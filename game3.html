@@ -253,6 +253,28 @@
                 backdrop-filter: blur(12px) !important;
                 box-shadow: 0 4px 15px rgba(0,0,0,0.2) !important;
                 border: 2px solid rgba(76, 175, 80, 0.5) !important;
+            }
+            
+            /* PC VERSION QUESTION DISPLAY - BLACK TEXT, BETTER DESIGN */
+            body.web-version .question-display {
+                position: fixed !important;
+                top: 8% !important;
+                left: 50% !important;
+                transform: translateX(-50%) !important;
+                font-size: 1.8em !important;
+                padding: 25px 40px !important;
+                max-width: 70% !important;
+                border-radius: 25px !important;
+                background: rgba(255, 255, 255, 0.98) !important;
+                color: #000000 !important; /* BLACK TEXT FOR PC */
+                font-weight: bold !important;
+                text-shadow: none !important;
+                backdrop-filter: blur(20px) !important;
+                box-shadow: 0 10px 40px rgba(0,0,0,0.4) !important;
+                border: 4px solid rgba(30, 144, 255, 0.7) !important;
+                z-index: 1000 !important;
+                text-align: center !important;
+                line-height: 1.4 !important;
                 z-index: 100 !important;
             }
         }
@@ -525,7 +547,7 @@
             cursor: pointer;
         }
 
-        /* WEB VERSION STYLES - FULL SCREEN DESKTOP */
+        /* WEB VERSION STYLES - TRULY FULL SCREEN PC VERSION */
         body.web-version {
             position: fixed;
             top: 0;
@@ -540,31 +562,15 @@
         }
         
         body.web-version .game-header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 80px;
-            margin: 0;
-            padding: 20px 0;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 0;
-            border: none;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            z-index: 1000;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-left: 40px;
-            padding-right: 40px;
+            display: none !important; /* REMOVED - No top panel for PC */
         }
         
         body.web-version .game-container {
             position: fixed;
-            top: 80px;
+            top: 0;
             left: 0;
             width: 100vw;
-            height: calc(100vh - 80px);
+            height: 100vh;
             margin: 0;
             padding: 0;
             background: linear-gradient(135deg, var(--sky-blue), var(--water-light));
@@ -576,10 +582,10 @@
         
         body.web-version canvas {
             position: fixed !important;
-            top: 80px !important;
+            top: 0 !important;
             left: 0 !important;
             width: 100vw !important;
-            height: calc(100vh - 80px) !important;
+            height: 100vh !important;
             border: none !important;
             border-radius: 0 !important;
             box-shadow: none !important;
@@ -588,35 +594,31 @@
             z-index: 1 !important;
         }
         
-        body.web-version .game-title {
-            font-size: 2.2em;
-            color: var(--dark-blue);
-            font-weight: bold;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-            margin: 0;
-        }
-        
+        /* Header elements hidden for PC version - truly full-screen gaming */
+        body.web-version .game-title,
         body.web-version .score-display {
-            font-size: 1.5em;
-            padding: 12px 25px;
-            min-width: 120px;
-            background: rgba(76, 175, 80, 0.9);
-            color: white;
-            border-radius: 20px;
-            font-weight: bold;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            display: none !important;
         }
         
         body.web-version .question-display {
             position: fixed !important;
-            top: 10% !important;
+            top: 8% !important;
             left: 50% !important;
             transform: translateX(-50%) !important;
-            font-size: 1.3em !important;
-            padding: 15px 25px !important;
-            max-width: 600px !important;
-            border-radius: 20px !important;
-            z-index: 100 !important;
+            font-size: 1.8em !important;
+            padding: 25px 40px !important;
+            max-width: 70% !important;
+            border-radius: 25px !important;
+            background: rgba(255, 255, 255, 0.98) !important;
+            color: #000000 !important; /* BLACK TEXT FOR PC */
+            font-weight: bold !important;
+            text-shadow: none !important;
+            backdrop-filter: blur(20px) !important;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4) !important;
+            border: 4px solid rgba(30, 144, 255, 0.7) !important;
+            z-index: 1000 !important;
+            text-align: center !important;
+            line-height: 1.4 !important;
         }
     </style>
 </head>
@@ -710,6 +712,9 @@
                 this.game1Score = parseInt(sessionStorage.getItem('aiplay_game1Score'), 10) || 0;
                 this.game2Score = parseInt(sessionStorage.getItem('aiplay_game2Score'), 10) || 0;
                 this.nextIndex = parseInt(sessionStorage.getItem('aiplay_nextIndex'), 10) || 6;
+                
+                // Ensure score is updated
+                this.updateScore();
                 
                 // Load questions
                 this.loadTopics();
@@ -867,15 +872,27 @@
                     questionEl.classList.add('show');
                     questionEl.textContent = q.question;
                     
-                    // Auto-hide question after 4 seconds for better game flow
+                    // Force black text for PC version
+                    if (document.body.classList.contains('web-version')) {
+                        questionEl.style.color = '#000000';
+                        questionEl.style.fontWeight = 'bold';
+                        questionEl.style.textShadow = 'none';
+                    }
+                    
+                    // Auto-hide question after 5 seconds for PC (longer for reading)
+                    const hideDelay = document.body.classList.contains('web-version') ? 6000 : 4000;
                     setTimeout(() => {
                         questionEl.classList.remove('show');
                         questionEl.classList.add('hide');
-                    }, 4000);
+                    }, hideDelay);
                 } else {
                     questionEl.classList.remove('hide');
                     questionEl.classList.add('show');
                     questionEl.textContent = 'All questions completed! Great job!';
+                    
+                    if (document.body.classList.contains('web-version')) {
+                        questionEl.style.color = '#000000';
+                    }
                 }
             }
             
@@ -1159,6 +1176,27 @@
                 return false; // No collision
             }
             
+            drawScore() {
+                // Draw score in top-right corner for PC version
+                if (document.body.classList.contains('web-version')) {
+                    this.ctx.save();
+                    this.ctx.font = 'bold 28px Arial';
+                    this.ctx.fillStyle = '#FFFFFF';
+                    this.ctx.strokeStyle = '#000000';
+                    this.ctx.lineWidth = 4;
+                    this.ctx.textAlign = 'right';
+                    
+                    const scoreText = `Score: ${this.score}`;
+                    const x = this.canvas.width - 40;
+                    const y = 50;
+                    
+                    // Draw text with black outline for visibility
+                    this.ctx.strokeText(scoreText, x, y);
+                    this.ctx.fillText(scoreText, x, y);
+                    this.ctx.restore();
+                }
+            }
+
             checkCollisions() {
                 for (let fish of this.fishes) {
                     if (fish.caught) continue;
@@ -1436,6 +1474,7 @@
                 this.drawHook();
                 this.drawSplashes();
                 this.drawParticles();
+                this.drawScore(); // Add score display for PC
             }
             
             drawSky() {
