@@ -475,7 +475,7 @@
 
         // Game State Variables
         let gameState = 'start';
-        let rocket = { x: 0, y: 0, w: 80, h: 120, animFrame: 0, withFire: false, shake: 0, fallingSpeed: 0 }; // Larger for better mobile visibility
+        let rocket = { x: 0, y: 0, w: 50, h: 70, animFrame: 0, withFire: false, shake: 0, fallingSpeed: 0 }; // Smaller optimized size for mobile
     let question = { text: '', answer: '' };
     let answers = [];
     let game1Score = 0; // from game 1
@@ -750,9 +750,10 @@
             // Scale context for high-DPI displays
             ctx.scale(dpr, dpr);
             
-            // Position rocket in center
+            // Position rocket above options for mobile
             rocket.x = containerWidth / 2;
-            rocket.y = containerHeight / 2;
+            const isMobileDevice = document.body.classList.contains('mobile-version');
+            rocket.y = isMobileDevice ? (containerHeight * 0.35) : (containerHeight / 2); // Higher position for mobile
             
             // Ensure canvas is visible
             canvas.style.display = 'block';
@@ -816,14 +817,14 @@
             const canvasHeight = canvas.height / (window.devicePixelRatio || 1);
             
             // Enhanced mobile-responsive hit detection
-            const isMobile = document.body.classList.contains('mobile-version');
+            const isMobileDevice = document.body.classList.contains('mobile-version');
             const boxWidth = isMobile ? Math.max(75, Math.min(85, canvasWidth / 5)) : answerBoxWidth;
             const boxHeight = isMobile ? Math.max(45, Math.min(55, canvasHeight / 12)) : answerBoxHeight;
             const margin = isMobile ? Math.max(6, canvasWidth / 50) : answerBoxMargin;
             
             const totalWidth = (boxWidth * 4) + (margin * 3);
             const startX = (canvasWidth - totalWidth) / 2;
-            const boxY = canvasHeight - boxHeight - (isMobile ? Math.max(25, canvasHeight / 20) : 40);
+            const boxY = canvasHeight - boxHeight - (isMobileDevice ? Math.max(100, canvasHeight / 6) : 40);
 
             answers.forEach((ans, index) => {
                 const boxX = startX + index * (boxWidth + margin);
@@ -1007,7 +1008,7 @@
             
             const totalWidth = (boxWidth * 4) + (margin * 3);
             const startX = (canvasWidth - totalWidth) / 2;
-            const boxY = canvasHeight - boxHeight - (isMobile ? Math.max(25, canvasHeight / 20) : 40);
+            const boxY = canvasHeight - boxHeight - (isMobile ? Math.max(100, canvasHeight / 6) : 40);
             
             answers.forEach((ans, index) => {
                 const boxX = startX + index * (boxWidth + margin);

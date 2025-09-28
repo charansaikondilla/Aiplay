@@ -364,30 +364,11 @@
         }
 
         .instructions {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(255, 255, 255, 0.9);
-            padding: 12px 20px;
-            border-radius: 12px;
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--dark-blue);
-            text-align: center;
-            border: 2px solid rgba(255, 255, 255, 0.5);
-            z-index: 10;
+            display: none !important; /* REMOVED - Full screen design only */
         }
 
         .fish-guide {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 12px 16px;
-            border-radius: 12px;
-            border: 2px solid rgba(255, 255, 255, 0.5);
-            z-index: 10;
+            display: none !important; /* REMOVED - Full screen design only */
         }
 
         .fish-item {
@@ -478,15 +459,11 @@
             }
 
             .instructions {
-                font-size: 12px;
-                padding: 8px 16px;
-                bottom: 10px;
+                display: none !important; /* REMOVED - Mobile full screen */
             }
 
             .fish-guide {
-                position: static;
-                margin: 10px auto 0;
-                max-width: 200px;
+                display: none !important; /* REMOVED - Mobile full screen */
             }
         }
 
@@ -1027,7 +1004,7 @@
                 this.gameStarted = true;
                 this.initializeFishes(); // Initialize fish for first question
                 document.getElementById('startBtn').style.display = 'none';
-                document.getElementById('instructions').style.display = 'block';
+                // Instructions removed for full-screen design
             }
             
             restartGame() {
@@ -1042,7 +1019,7 @@
                 this.displayCurrentQuestion();
                 document.getElementById('startBtn').style.display = 'block';
                 document.getElementById('scorePanel').style.display = 'none';
-                document.getElementById('instructions').style.display = 'block';
+                // Instructions removed for full-screen design
             }
             
             goBackToTopics() {
@@ -1308,7 +1285,7 @@
                 `;
                 
                 document.getElementById('scorePanel').style.display = 'block';
-                document.getElementById('instructions').style.display = 'none';
+                // Instructions already hidden for full-screen design
             }
             
             createSplash(x, y) {
