@@ -197,15 +197,17 @@
             }
             
             body.mobile-version canvas {
-                position: fixed !important;
+                position: absolute !important;
                 top: 0 !important;
                 left: 0 !important;
-                width: 100vw !important;
-                height: 100vh !important;
+                width: 100% !important;
+                height: 100% !important;
                 border-radius: 0 !important;
                 margin: 0 !important;
                 padding: 0 !important;
                 z-index: 1 !important;
+                display: block !important;
+                background: transparent !important;
             }
             
             body.mobile-version .title {
@@ -244,24 +246,23 @@
             
             body.mobile-version .start-button, 
             body.mobile-version .restart-button {
-                position: fixed !important;
+                position: absolute !important;
                 bottom: 15% !important;
                 left: 50% !important;
                 transform: translateX(-50%) !important;
                 font-size: 1.3em !important;
                 padding: 15px 35px !important;
                 margin: 0 !important;
-                border-radius: 30px !important;
+                border-radius: 20px !important;
                 min-width: 200px !important;
-                box-shadow: 0 8px 25px rgba(0,0,0,0.3) !important;
+                box-shadow: 0 6px 15px rgba(255,207,84,0.4) !important;
                 z-index: 1000 !important;
                 width: auto !important;
-                border-radius: 20px !important;
-                box-shadow: 0 6px 15px rgba(255,207,84,0.4) !important;
+                touch-action: manipulation !important;
             }
             
             body.mobile-version .small-button {
-                position: fixed !important;
+                position: absolute !important;
                 bottom: 5% !important;
                 left: 50% !important;
                 transform: translateX(-50%) !important;
@@ -271,6 +272,7 @@
                 border-radius: 20px !important;
                 z-index: 1000 !important;
                 box-shadow: 0 6px 20px rgba(0,0,0,0.3) !important;
+                touch-action: manipulation !important;
             }
         }
 
@@ -614,12 +616,44 @@
             }
         }
 
+                // Enhanced mobile touch event prevention
+        function preventMobileRefresh() {
+            // Prevent pull-to-refresh and zoom
+            document.addEventListener('touchmove', function(e) {
+                e.preventDefault();
+            }, { passive: false });
+            
+            document.addEventListener('touchstart', function(e) {
+                if (e.touches.length > 1) {
+                    e.preventDefault();
+                }
+            }, { passive: false });
+            
+            // Prevent pull-to-refresh specifically
+            let lastTouchY = 0;
+            document.addEventListener('touchstart', function(e) {
+                lastTouchY = e.touches[0].clientY;
+            });
+            
+            document.addEventListener('touchmove', function(e) {
+                const touchY = e.touches[0].clientY;
+                const touchYDelta = touchY - lastTouchY;
+                lastTouchY = touchY;
+                
+                if (touchYDelta > 0 && window.scrollY === 0) {
+                    e.preventDefault();
+                }
+            }, { passive: false });
+        }
+
                 // Initial setup
                 window.onload = function() {
+            preventMobileRefresh();
             resizeCanvas();
             window.addEventListener('resize', resizeCanvas);
             canvas.addEventListener('click', handleInput);
-            canvas.addEventListener('touchstart', handleTouchInput);
+            canvas.addEventListener('touchstart', handleTouchInput, { passive: false });
+            canvas.addEventListener('touchend', function(e) { e.preventDefault(); }, { passive: false });
             startButton.addEventListener('click', startGame);
                         document.getElementById('playAgainBtn').addEventListener('click', () => {
                                 // Restart both games quickly: go back to game2 topic overlay
@@ -698,39 +732,30 @@
                 }
 
         function resizeCanvas() {
+            const container = document.querySelector('.game-container');
             const isMobile = document.body.classList.contains('mobile-version');
             const isWeb = document.body.classList.contains('web-version');
             const dpr = window.devicePixelRatio || 1;
             
-            if (isMobile) {
-                // Full-screen mobile canvas
-                canvas.width = window.innerWidth * dpr;
-                canvas.height = window.innerHeight * dpr;
-                canvas.style.width = window.innerWidth + 'px';
-                canvas.style.height = window.innerHeight + 'px';
-                ctx.scale(dpr, dpr);
-                rocket.x = window.innerWidth / 2;
-                rocket.y = window.innerHeight / 2;
-            } else if (isWeb) {
-                // Full-screen desktop/laptop version
-                canvas.width = window.innerWidth * dpr;
-                canvas.height = window.innerHeight * dpr;
-                canvas.style.width = window.innerWidth + 'px';
-                canvas.style.height = window.innerHeight + 'px';
-                ctx.scale(dpr, dpr);
-                rocket.x = window.innerWidth / 2;
-                rocket.y = window.innerHeight / 2;
-            } else {
-                // Fallback
-                const container = document.querySelector('.game-container') || document.body;
-                canvas.width = window.innerWidth * dpr;
-                canvas.height = window.innerHeight * dpr;
-                canvas.style.width = window.innerWidth + 'px';
-                canvas.style.height = window.innerHeight + 'px';
-                ctx.scale(dpr, dpr);
-                rocket.x = window.innerWidth / 2;
-                rocket.y = window.innerHeight / 2;
-            }
+            // Get actual container dimensions
+            const containerWidth = container ? container.clientWidth : window.innerWidth;
+            const containerHeight = container ? container.clientHeight : window.innerHeight;
+            
+            // Set canvas dimensions
+            canvas.width = containerWidth * dpr;
+            canvas.height = containerHeight * dpr;
+            canvas.style.width = containerWidth + 'px';
+            canvas.style.height = containerHeight + 'px';
+            
+            // Scale context for high-DPI displays
+            ctx.scale(dpr, dpr);
+            
+            // Position rocket in center
+            rocket.x = containerWidth / 2;
+            rocket.y = containerHeight / 2;
+            
+            // Ensure canvas is visible
+            canvas.style.display = 'block';
         }
 
         // Main game loop
@@ -773,28 +798,32 @@
         function handleTouchInput(event) {
             if (gameState !== 'playing') return;
             event.preventDefault();
-            const touch = event.touches[0];
-            processInput(touch.clientX, touch.clientY);
+            event.stopPropagation();
+            const touch = event.touches[0] || event.changedTouches[0];
+            if (touch) {
+                processInput(touch.clientX, touch.clientY);
+            }
         }
 
         function processInput(clientX, clientY) {
             const rect = canvas.getBoundingClientRect();
-            const clickX = clientX - rect.left;
-            const clickY = clientY - rect.top;
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            const clickX = (clientX - rect.left) * scaleX / (window.devicePixelRatio || 1);
+            const clickY = (clientY - rect.top) * scaleY / (window.devicePixelRatio || 1);
             
-            const container = document.querySelector('.game-container');
-            const canvasWidth = container.clientWidth;
-            const canvasHeight = container.clientHeight;
+            const canvasWidth = canvas.width / (window.devicePixelRatio || 1);
+            const canvasHeight = canvas.height / (window.devicePixelRatio || 1);
             
-            // Mobile-responsive hit detection
-            const isMobile = canvasWidth < 768;
-            const boxWidth = isMobile ? Math.min(80, canvasWidth / 5) : answerBoxWidth;
-            const boxHeight = isMobile ? Math.min(50, canvasHeight / 12) : answerBoxHeight;
-            const margin = isMobile ? 8 : answerBoxMargin;
+            // Enhanced mobile-responsive hit detection
+            const isMobile = document.body.classList.contains('mobile-version');
+            const boxWidth = isMobile ? Math.max(75, Math.min(85, canvasWidth / 5)) : answerBoxWidth;
+            const boxHeight = isMobile ? Math.max(45, Math.min(55, canvasHeight / 12)) : answerBoxHeight;
+            const margin = isMobile ? Math.max(6, canvasWidth / 50) : answerBoxMargin;
             
             const totalWidth = (boxWidth * 4) + (margin * 3);
             const startX = (canvasWidth - totalWidth) / 2;
-            const boxY = canvasHeight - boxHeight - (isMobile ? 20 : 40);
+            const boxY = canvasHeight - boxHeight - (isMobile ? Math.max(25, canvasHeight / 20) : 40);
 
             answers.forEach((ans, index) => {
                 const boxX = startX + index * (boxWidth + margin);
@@ -966,20 +995,19 @@
 
 
         function drawAnswers() {
-            const container = document.querySelector('.game-container');
-            const canvasWidth = container.clientWidth;
-            const canvasHeight = container.clientHeight;
+            const canvasWidth = canvas.width / (window.devicePixelRatio || 1);
+            const canvasHeight = canvas.height / (window.devicePixelRatio || 1);
             
-            // Mobile-responsive box sizing
-            const isMobile = canvasWidth < 768;
-            const boxWidth = isMobile ? Math.min(80, canvasWidth / 5) : answerBoxWidth;
-            const boxHeight = isMobile ? Math.min(50, canvasHeight / 12) : answerBoxHeight;
-            const margin = isMobile ? 8 : answerBoxMargin;
-            const fontSize = isMobile ? Math.max(12, boxWidth / 6) : 24;
+            // Enhanced mobile detection and sizing
+            const isMobile = document.body.classList.contains('mobile-version');
+            const boxWidth = isMobile ? Math.max(75, Math.min(85, canvasWidth / 5)) : answerBoxWidth;
+            const boxHeight = isMobile ? Math.max(45, Math.min(55, canvasHeight / 12)) : answerBoxHeight;
+            const margin = isMobile ? Math.max(6, canvasWidth / 50) : answerBoxMargin;
+            const fontSize = isMobile ? Math.max(14, Math.min(18, boxWidth / 5)) : 24;
             
             const totalWidth = (boxWidth * 4) + (margin * 3);
             const startX = (canvasWidth - totalWidth) / 2;
-            const boxY = canvasHeight - boxHeight - (isMobile ? 20 : 40);
+            const boxY = canvasHeight - boxHeight - (isMobile ? Math.max(25, canvasHeight / 20) : 40);
             
             answers.forEach((ans, index) => {
                 const boxX = startX + index * (boxWidth + margin);
@@ -1018,9 +1046,8 @@
         }
         
         function draw() {
-            const container = document.querySelector('.game-container');
-            const canvasWidth = container.clientWidth;
-            const canvasHeight = container.clientHeight;
+            const canvasWidth = canvas.width / (window.devicePixelRatio || 1);
+            const canvasHeight = canvas.height / (window.devicePixelRatio || 1);
             
             ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
@@ -1028,27 +1055,35 @@
                 drawRocket(rocket.x, rocket.y, rocket.w, rocket.h, rocket.withFire);
 
                 if (gameState === 'playing' || gameState === 'crashing') {
-                    // Draw question text with mobile responsiveness
-                    const isMobile = canvasWidth < 768;
-                    const questionFontSize = isMobile ? Math.max(16, canvasWidth / 25) : 40;
-                    const questionY = isMobile ? Math.max(50, canvasHeight / 15) : 80;
+                    // Draw question text with enhanced mobile responsiveness
+                    const isMobile = document.body.classList.contains('mobile-version');
+                    const questionFontSize = isMobile ? Math.max(18, Math.min(24, canvasWidth / 20)) : 40;
+                    const questionY = isMobile ? Math.max(60, canvasHeight / 12) : 80;
                     
-                    ctx.font = `${questionFontSize}px "Poppins"`;
+                    ctx.font = `bold ${questionFontSize}px "Poppins"`;
                     ctx.fillStyle = white;
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'top';
+                    ctx.strokeStyle = 'rgba(0,0,0,0.5)';
+                    ctx.lineWidth = 2;
                     
-                    // Handle long questions on mobile
+                    // Handle long questions on mobile with better wrapping
                     const text = question.text;
-                    if (isMobile && text.length > 20) {
+                    if (isMobile && text.length > 15) {
                         const words = text.split(' ');
                         const mid = Math.ceil(words.length / 2);
                         const line1 = words.slice(0, mid).join(' ');
                         const line2 = words.slice(mid).join(' ');
                         
+                        // Draw with stroke for better visibility
+                        ctx.strokeText(line1, canvasWidth / 2, questionY);
                         ctx.fillText(line1, canvasWidth / 2, questionY);
-                        ctx.fillText(line2, canvasWidth / 2, questionY + questionFontSize + 5);
+                        if (line2) {
+                            ctx.strokeText(line2, canvasWidth / 2, questionY + questionFontSize + 8);
+                            ctx.fillText(line2, canvasWidth / 2, questionY + questionFontSize + 8);
+                        }
                     } else {
+                        ctx.strokeText(text, canvasWidth / 2, questionY);
                         ctx.fillText(text, canvasWidth / 2, questionY);
                     }
 
