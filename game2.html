@@ -590,6 +590,11 @@
                     <button class="topic-btn" data-topic="maths">Math</button>
                     <button class="topic-btn" data-topic="aiAgents">AI Agents</button>
                     <button class="topic-btn" data-topic="sql">SQL</button>
+                    <button class="topic-btn" data-topic="lawyer">Legal/Law</button>
+                    <button class="topic-btn" data-topic="python">Python</button>
+                    <button class="topic-btn" data-topic="cybersecurity">Cybersecurity</button>
+                    <button class="topic-btn" data-topic="digitalMarketing">Digital Marketing</button>
+                    <button class="topic-btn" data-topic="dataScience">Data Science</button>
                 </div>
                 <div class="summary" id="topicSummary" style="display:none">
                     <h4 id="summaryTitle"></h4>
@@ -778,6 +783,276 @@ SELECT Name, Age FROM Students WHERE Grade = 'A';
                                     { question: 'Which JOIN returns only the matching rows from both tables?', options: ['LEFT JOIN','RIGHT JOIN','INNER JOIN','FULL JOIN'], answer: 'INNER JOIN', explanation: 'INNER JOIN shows only rows that exist in both tables.' },
                                     { question: 'Which command removes the entire table including its structure?', options: ['DELETE','DROP','TRUNCATE','REVOKE'], answer: 'DROP', explanation: 'DROP permanently deletes the table and its data.' },
                                     { question: 'Which SQL command is used to give a user permission to access data?', options: ['INSERT','GRANT','REVOKE','SAVEPOINT'], answer: 'GRANT', explanation: 'GRANT is used to give privileges to users.' }
+                                ]
+                            },
+                            lawyer: {
+                                summary: 'Lawyers are legal professionals who provide advice, represent clients in legal matters, and help navigate the complex legal system. They work in various areas of law to ensure justice and protect rights.',
+                                examples: ['Criminal Defense Attorney', 'Corporate Lawyer', 'Family Law Attorney', 'Public Interest Lawyer'],
+                                details: `
+                                    <h5>1. What is a Lawyer?</h5>
+                                    <p>A lawyer is a legal professional who has studied law and is licensed to practice in a jurisdiction. Lawyers provide legal advice, represent clients in court, draft legal documents, and help people understand their rights and obligations under the law.</p>
+                                    
+                                    <h5>2. Types of Lawyers</h5>
+                                    <ul>
+                                        <li><strong>Criminal Defense Lawyers:</strong> Defend people accused of crimes</li>
+                                        <li><strong>Civil Rights Lawyers:</strong> Protect constitutional rights and freedoms</li>
+                                        <li><strong>Corporate Lawyers:</strong> Handle business legal matters</li>
+                                        <li><strong>Family Lawyers:</strong> Deal with divorce, custody, and family issues</li>
+                                        <li><strong>Personal Injury Lawyers:</strong> Help accident victims get compensation</li>
+                                        <li><strong>Environmental Lawyers:</strong> Work on environmental protection cases</li>
+                                        <li><strong>Immigration Lawyers:</strong> Help with visa and citizenship matters</li>
+                                        <li><strong>Tax Lawyers:</strong> Handle tax-related legal issues</li>
+                                    </ul>
+                                    
+                                    <h5>3. What Lawyers Do</h5>
+                                    <ul>
+                                        <li>Provide legal advice and counsel</li>
+                                        <li>Represent clients in courts and legal proceedings</li>
+                                        <li>Draft contracts, wills, and legal documents</li>
+                                        <li>Research laws and legal precedents</li>
+                                        <li>Negotiate settlements and agreements</li>
+                                        <li>Protect clients' rights and interests</li>
+                                    </ul>
+                                    
+                                    <h5>4. Indian Legal System</h5>
+                                    <ul>
+                                        <li><strong>Supreme Court:</strong> Highest court in India</li>
+                                        <li><strong>High Courts:</strong> State-level highest courts</li>
+                                        <li><strong>District Courts:</strong> Local trial courts</li>
+                                        <li><strong>Constitution:</strong> Supreme law of the land</li>
+                                        <li><strong>Bar Council:</strong> Regulates legal profession</li>
+                                    </ul>
+                                    
+                                    <h5>5. How to Become a Lawyer</h5>
+                                    <ul>
+                                        <li>Complete law degree (LLB or integrated course)</li>
+                                        <li>Pass bar examination</li>
+                                        <li>Get enrolled with Bar Council</li>
+                                        <li>Complete internship/training</li>
+                                        <li>Start practice or join law firm</li>
+                                    </ul>
+                                `,
+                                questions: [
+                                    { question: 'What is the main role of a lawyer?', options: ['To entertain people','To provide legal advice and representation','To sell products','To teach mathematics'], answer: 'To provide legal advice and representation', explanation: 'Lawyers are trained to provide legal counsel and represent clients in legal matters.' },
+                                    { question: 'Which type of lawyer defends people accused of crimes?', options: ['Family lawyer','Criminal defense lawyer','Tax lawyer','Environmental lawyer'], answer: 'Criminal defense lawyer', explanation: 'Criminal defense lawyers specialize in defending individuals charged with criminal offenses.' },
+                                    { question: 'What is the highest court in India?', options: ['High Court','District Court','Supreme Court','Sessions Court'], answer: 'Supreme Court', explanation: 'The Supreme Court of India is the highest judicial authority in the country.' },
+                                    { question: 'Which document is considered the supreme law of India?', options: ['Indian Penal Code','Constitution of India','Civil Procedure Code','Companies Act'], answer: 'Constitution of India', explanation: 'The Constitution of India is the supreme law that governs the country and all other laws must conform to it.' },
+                                    { question: 'What degree is required to become a lawyer in India?', options: ['MBA','LLB','MBBS','B.Tech'], answer: 'LLB', explanation: 'LLB (Bachelor of Laws) or an integrated law degree is required to practice law in India.' },
+                                    { question: 'Which organization regulates the legal profession in India?', options: ['Bar Council','Medical Council','Engineering Council','Teaching Council'], answer: 'Bar Council', explanation: 'The Bar Council of India regulates legal education and the legal profession in India.' },
+                                    { question: 'What type of lawyer handles business legal matters?', options: ['Family lawyer','Corporate lawyer','Criminal lawyer','Immigration lawyer'], answer: 'Corporate lawyer', explanation: 'Corporate lawyers specialize in business law, including contracts, mergers, and corporate governance.' },
+                                    { question: 'In a court case, what is the person who files the case called?', options: ['Defendant','Plaintiff','Witness','Judge'], answer: 'Plaintiff', explanation: 'The plaintiff is the person who initiates a lawsuit by filing a complaint against another party.' },
+                                    { question: 'What is the term for a lawyer who represents clients without charge?', options: ['Pro bono lawyer','Corporate lawyer','Retainer lawyer','Commercial lawyer'], answer: 'Pro bono lawyer', explanation: 'Pro bono refers to legal services provided voluntarily and without payment, typically for the public good.' },
+                                    { question: 'Which type of lawyer helps with visa and citizenship issues?', options: ['Tax lawyer','Immigration lawyer','Family lawyer','Criminal lawyer'], answer: 'Immigration lawyer', explanation: 'Immigration lawyers specialize in immigration law, helping clients with visas, citizenship, and deportation issues.' }
+                                ]
+                            },
+                            python: {
+                                summary: 'Python is a high-level, interpreted programming language known for its simplicity and versatility. It is widely used in web development, data science, AI, automation, and more.',
+                                examples: ['print("Hello World")', 'if x > 5: print("Greater")', 'for i in range(10): print(i)', 'def function_name(): return value'],
+                                details: `
+                                    <h5>1. What is Python?</h5>
+                                    <p>Python is a high-level, interpreted programming language created by Guido van Rossum in 1991. It emphasizes code readability and simplicity, making it perfect for beginners and professionals alike.</p>
+                                    
+                                    <h5>2. Key Features</h5>
+                                    <ul>
+                                        <li><strong>Easy to Learn:</strong> Simple, readable syntax</li>
+                                        <li><strong>Interpreted:</strong> No compilation needed</li>
+                                        <li><strong>Cross-platform:</strong> Runs on Windows, Mac, Linux</li>
+                                        <li><strong>Open Source:</strong> Free to use and modify</li>
+                                        <li><strong>Large Community:</strong> Extensive libraries and support</li>
+                                        <li><strong>Versatile:</strong> Used in many domains</li>
+                                    </ul>
+                                    
+                                    <h5>3. Common Applications</h5>
+                                    <ul>
+                                        <li><strong>Web Development:</strong> Django, Flask frameworks</li>
+                                        <li><strong>Data Science:</strong> Pandas, NumPy, Matplotlib</li>
+                                        <li><strong>AI/Machine Learning:</strong> TensorFlow, PyTorch</li>
+                                        <li><strong>Automation:</strong> Scripts for repetitive tasks</li>
+                                        <li><strong>Game Development:</strong> Pygame library</li>
+                                        <li><strong>Desktop Applications:</strong> Tkinter, PyQt</li>
+                                    </ul>
+                                    
+                                    <h5>4. Basic Syntax Examples</h5>
+                                    <pre style="background: #f5f5f5; padding: 10px; border-radius: 5px; font-size: 12px;">
+# Variables
+name = "Alice"
+age = 25
+
+# Control structures
+if age >= 18:
+    print("Adult")
+else:
+    print("Minor")
+
+# Loops
+for i in range(5):
+    print(f"Number: {i}")
+
+# Functions
+def greet(name):
+    return f"Hello, {name}!"
+                                    </pre>
+                                `,
+                                questions: [
+                                    { question: 'Who created Python programming language?', options: ['Guido van Rossum','Bill Gates','Mark Zuckerberg','Elon Musk'], answer: 'Guido van Rossum', explanation: 'Python was created by Guido van Rossum in 1991.' },
+                                    { question: 'What type of language is Python?', options: ['Interpreted','Compiled','Assembly','Machine'], answer: 'Interpreted', explanation: 'Python is an interpreted language, meaning code is executed line by line without compilation.' },
+                                    { question: 'Which Python framework is popular for web development?', options: ['Django','Photoshop','Excel','PowerPoint'], answer: 'Django', explanation: 'Django is a popular Python web framework for building web applications.' },
+                                    { question: 'What is the correct way to print in Python?', options: ['print("Hello")','echo "Hello"','console.log("Hello")','System.out.println("Hello")'], answer: 'print("Hello")', explanation: 'In Python, we use print() function to display output.' },
+                                    { question: 'Which library is commonly used for data analysis in Python?', options: ['Pandas','jQuery','Bootstrap','React'], answer: 'Pandas', explanation: 'Pandas is a powerful Python library for data manipulation and analysis.' },
+                                    { question: 'What does "len()" function do in Python?', options: ['Returns length','Deletes items','Sorts list','Creates loop'], answer: 'Returns length', explanation: 'The len() function returns the number of items in an object.' },
+                                    { question: 'Which symbol is used for comments in Python?', options: ['#','//','/* */','--'], answer: '#', explanation: 'Python uses # symbol for single-line comments.' },
+                                    { question: 'What is the correct way to define a function in Python?', options: ['def function_name():','function function_name()','func function_name()','create function_name()'], answer: 'def function_name():', explanation: 'Python uses "def" keyword to define functions.' },
+                                    { question: 'Which Python library is used for machine learning?', options: ['TensorFlow','Word','Excel','PowerPoint'], answer: 'TensorFlow', explanation: 'TensorFlow is a popular Python library for machine learning and AI.' },
+                                    { question: 'What is the file extension for Python files?', options: ['.py','.txt','.html','.js'], answer: '.py', explanation: 'Python files use .py extension.' }
+                                ]
+                            },
+                            cybersecurity: {
+                                summary: 'Cybersecurity protects digital systems, networks, and data from cyber threats. It involves preventing, detecting, and responding to cyber attacks to ensure information security.',
+                                examples: ['Password Protection', 'Firewall Setup', 'Antivirus Software', 'Two-Factor Authentication'],
+                                details: `
+                                    <h5>1. What is Cybersecurity?</h5>
+                                    <p>Cybersecurity is the practice of protecting digital systems, networks, programs, and data from cyber attacks. It aims to ensure confidentiality, integrity, and availability of information.</p>
+                                    
+                                    <h5>2. Types of Cyber Threats</h5>
+                                    <ul>
+                                        <li><strong>Malware:</strong> Viruses, trojans, ransomware</li>
+                                        <li><strong>Phishing:</strong> Fraudulent emails to steal data</li>
+                                        <li><strong>Social Engineering:</strong> Manipulating people for information</li>
+                                        <li><strong>DDoS Attacks:</strong> Overwhelming systems with traffic</li>
+                                        <li><strong>Data Breaches:</strong> Unauthorized access to sensitive data</li>
+                                        <li><strong>Identity Theft:</strong> Stealing personal information</li>
+                                    </ul>
+                                    
+                                    <h5>3. Security Best Practices</h5>
+                                    <ul>
+                                        <li>Use strong, unique passwords</li>
+                                        <li>Enable two-factor authentication</li>
+                                        <li>Keep software updated</li>
+                                        <li>Use reputable antivirus software</li>
+                                        <li>Be cautious with email attachments</li>
+                                        <li>Regular data backups</li>
+                                        <li>Secure Wi-Fi networks</li>
+                                    </ul>
+                                    
+                                    <h5>4. Career Opportunities</h5>
+                                    <ul>
+                                        <li><strong>Security Analyst:</strong> Monitor and protect systems</li>
+                                        <li><strong>Ethical Hacker:</strong> Test system vulnerabilities</li>
+                                        <li><strong>Security Architect:</strong> Design secure systems</li>
+                                        <li><strong>Incident Responder:</strong> Handle security breaches</li>
+                                        <li><strong>Compliance Officer:</strong> Ensure regulatory compliance</li>
+                                    </ul>
+                                `,
+                                questions: [
+                                    { question: 'What does cybersecurity primarily protect?', options: ['Digital systems','Physical buildings','Paper documents','Telephone calls'], answer: 'Digital systems', explanation: 'Cybersecurity focuses on protecting digital systems, networks, and data from cyber threats.' },
+                                    { question: 'What is phishing?', options: ['Fraudulent emails','Catching fish','Computer virus','Hardware failure'], answer: 'Fraudulent emails', explanation: 'Phishing involves sending fraudulent emails to trick people into sharing sensitive information.' },
+                                    { question: 'What is two-factor authentication?', options: ['Extra security layer','Password manager','Antivirus software','Firewall rule'], answer: 'Extra security layer', explanation: 'Two-factor authentication adds an extra security step beyond just username and password.' },
+                                    { question: 'What is malware?', options: ['Malicious software','Hardware component','Network cable','Security tool'], answer: 'Malicious software', explanation: 'Malware is malicious software designed to harm, disrupt, or gain unauthorized access to systems.' },
+                                    { question: 'What does DDoS attack do?', options: ['Overwhelms systems','Protects data','Encrypts files','Updates software'], answer: 'Overwhelms systems', explanation: 'DDoS (Distributed Denial of Service) attacks overwhelm systems with excessive traffic.' },
+                                    { question: 'What is the purpose of a firewall?', options: ['Block unauthorized access','Speed up internet','Store passwords','Create backups'], answer: 'Block unauthorized access', explanation: 'Firewalls monitor and control network traffic to block unauthorized access.' },
+                                    { question: 'What is ransomware?', options: ['Malware that encrypts data','Password manager','Security scanner','Backup software'], answer: 'Malware that encrypts data', explanation: 'Ransomware encrypts user data and demands payment for the decryption key.' },
+                                    { question: 'What is social engineering in cybersecurity?', options: ['Manipulating people','Building networks','Writing code','Installing software'], answer: 'Manipulating people', explanation: 'Social engineering involves manipulating people to divulge confidential information.' },
+                                    { question: 'What is an ethical hacker?', options: ['Tests system security','Breaks into systems illegally','Sells stolen data','Creates viruses'], answer: 'Tests system security', explanation: 'Ethical hackers legally test systems to find vulnerabilities and improve security.' },
+                                    { question: 'What should you do with software updates?', options: ['Install them regularly','Ignore them','Delete them','Share them'], answer: 'Install them regularly', explanation: 'Regular software updates patch security vulnerabilities and improve protection.' }
+                                ]
+                            },
+                            digitalMarketing: {
+                                summary: 'Digital marketing promotes products and services using digital channels like social media, search engines, email, and websites to reach and engage target audiences.',
+                                examples: ['Social Media Ads', 'Google Search Ads', 'Email Campaigns', 'Content Marketing'],
+                                details: `
+                                    <h5>1. What is Digital Marketing?</h5>
+                                    <p>Digital marketing is the promotion of products or services using digital technologies and channels to reach consumers. It includes all marketing efforts that use electronic devices or the internet.</p>
+                                    
+                                    <h5>2. Key Digital Marketing Channels</h5>
+                                    <ul>
+                                        <li><strong>Social Media Marketing:</strong> Facebook, Instagram, Twitter, LinkedIn</li>
+                                        <li><strong>Search Engine Marketing:</strong> Google Ads, Bing Ads</li>
+                                        <li><strong>Search Engine Optimization (SEO):</strong> Organic search rankings</li>
+                                        <li><strong>Email Marketing:</strong> Newsletters, promotional emails</li>
+                                        <li><strong>Content Marketing:</strong> Blogs, videos, infographics</li>
+                                        <li><strong>Affiliate Marketing:</strong> Partner-based promotions</li>
+                                        <li><strong>Influencer Marketing:</strong> Collaborations with influencers</li>
+                                    </ul>
+                                    
+                                    <h5>3. Benefits of Digital Marketing</h5>
+                                    <ul>
+                                        <li>Global reach and accessibility</li>
+                                        <li>Cost-effective compared to traditional marketing</li>
+                                        <li>Measurable results and analytics</li>
+                                        <li>Targeted audience segmentation</li>
+                                        <li>Real-time campaign adjustments</li>
+                                        <li>Higher engagement rates</li>
+                                    </ul>
+                                    
+                                    <h5>4. Important Metrics</h5>
+                                    <ul>
+                                        <li><strong>CTR:</strong> Click-Through Rate</li>
+                                        <li><strong>CPA:</strong> Cost Per Acquisition</li>
+                                        <li><strong>ROI:</strong> Return on Investment</li>
+                                        <li><strong>Conversion Rate:</strong> Percentage of visitors who take action</li>
+                                        <li><strong>Engagement Rate:</strong> Likes, shares, comments</li>
+                                    </ul>
+                                `,
+                                questions: [
+                                    { question: 'What is digital marketing?', options: ['Online promotion','Traditional advertising','Print media','Radio broadcasting'], answer: 'Online promotion', explanation: 'Digital marketing involves promoting products/services using digital channels and technologies.' },
+                                    { question: 'What does SEO stand for?', options: ['Search Engine Optimization','Social Event Organization','Software Engineering Online','Sales Executive Office'], answer: 'Search Engine Optimization', explanation: 'SEO is the practice of optimizing websites to rank higher in search engine results.' },
+                                    { question: 'Which platform is NOT typically used for social media marketing?', options: ['MS Excel','Facebook','Instagram','Twitter'], answer: 'MS Excel', explanation: 'Excel is a spreadsheet application, not a social media platform for marketing.' },
+                                    { question: 'What does CTR measure in digital marketing?', options: ['Click-Through Rate','Customer Total Revenue','Content Time Ratio','Call To Register'], answer: 'Click-Through Rate', explanation: 'CTR measures the percentage of people who click on an ad after seeing it.' },
+                                    { question: 'What is the main goal of content marketing?', options: ['Provide valuable content','Sell products directly','Collect email addresses','Increase website traffic'], answer: 'Provide valuable content', explanation: 'Content marketing focuses on creating valuable, relevant content to attract and engage audiences.' },
+                                    { question: 'What is email marketing primarily used for?', options: ['Communicate with customers','Store customer data','Process payments','Design websites'], answer: 'Communicate with customers', explanation: 'Email marketing is used to communicate directly with customers through newsletters and promotional emails.' },
+                                    { question: 'What does PPC stand for in digital advertising?', options: ['Pay-Per-Click','Public Private Company','Personal Profile Creation','Product Price Comparison'], answer: 'Pay-Per-Click', explanation: 'PPC is an advertising model where advertisers pay each time someone clicks their ad.' },
+                                    { question: 'Which metric measures the profitability of marketing campaigns?', options: ['ROI','URL','PDF','GPS'], answer: 'ROI', explanation: 'ROI (Return on Investment) measures the profitability and effectiveness of marketing campaigns.' },
+                                    { question: 'What is influencer marketing?', options: ['Collaborating with popular people','Traditional TV advertising','Print media campaigns','Radio sponsorships'], answer: 'Collaborating with popular people', explanation: 'Influencer marketing involves partnering with social media influencers to promote products.' },
+                                    { question: 'What is the main advantage of digital marketing over traditional marketing?', options: ['Measurable results','Higher costs','Limited reach','Slower results'], answer: 'Measurable results', explanation: 'Digital marketing provides detailed analytics and measurable results, unlike traditional marketing.' }
+                                ]
+                            },
+                            dataScience: {
+                                summary: 'Data Science combines statistics, programming, and domain expertise to extract insights from data. It involves collecting, analyzing, and interpreting large datasets to solve real-world problems.',
+                                examples: ['Netflix Recommendations', 'Weather Predictions', 'Fraud Detection', 'Medical Diagnosis'],
+                                details: `
+                                    <h5>1. What is Data Science?</h5>
+                                    <p>Data Science is an interdisciplinary field that uses scientific methods, processes, algorithms, and systems to extract knowledge and insights from structured and unstructured data.</p>
+                                    
+                                    <h5>2. Key Components</h5>
+                                    <ul>
+                                        <li><strong>Statistics:</strong> Mathematical analysis of data</li>
+                                        <li><strong>Programming:</strong> Python, R, SQL for data manipulation</li>
+                                        <li><strong>Machine Learning:</strong> Algorithms that learn from data</li>
+                                        <li><strong>Data Visualization:</strong> Charts, graphs, dashboards</li>
+                                        <li><strong>Domain Expertise:</strong> Understanding the business context</li>
+                                        <li><strong>Big Data Tools:</strong> Hadoop, Spark for large datasets</li>
+                                    </ul>
+                                    
+                                    <h5>3. Data Science Process</h5>
+                                    <ul>
+                                        <li><strong>Data Collection:</strong> Gathering relevant data</li>
+                                        <li><strong>Data Cleaning:</strong> Removing errors and inconsistencies</li>
+                                        <li><strong>Exploratory Analysis:</strong> Understanding data patterns</li>
+                                        <li><strong>Model Building:</strong> Creating predictive models</li>
+                                        <li><strong>Model Evaluation:</strong> Testing model accuracy</li>
+                                        <li><strong>Deployment:</strong> Implementing solutions</li>
+                                    </ul>
+                                    
+                                    <h5>4. Real-World Applications</h5>
+                                    <ul>
+                                        <li><strong>Healthcare:</strong> Disease prediction, drug discovery</li>
+                                        <li><strong>Finance:</strong> Fraud detection, risk assessment</li>
+                                        <li><strong>Retail:</strong> Recommendation systems, inventory management</li>
+                                        <li><strong>Transportation:</strong> Route optimization, autonomous vehicles</li>
+                                        <li><strong>Entertainment:</strong> Content recommendations, audience analysis</li>
+                                    </ul>
+                                `,
+                                questions: [
+                                    { question: 'What is the main goal of data science?', options: ['Extract insights from data','Create websites','Design graphics','Write documents'], answer: 'Extract insights from data', explanation: 'Data science aims to extract meaningful insights and knowledge from data to solve problems.' },
+                                    { question: 'Which programming language is most popular in data science?', options: ['Python','HTML','CSS','JavaScript'], answer: 'Python', explanation: 'Python is widely used in data science due to its powerful libraries like Pandas, NumPy, and Scikit-learn.' },
+                                    { question: 'What is machine learning?', options: ['Algorithms that learn from data','Computer hardware','Internet connection','Software installation'], answer: 'Algorithms that learn from data', explanation: 'Machine learning involves algorithms that can learn patterns from data and make predictions.' },
+                                    { question: 'What does data visualization help with?', options: ['Understanding data patterns','Storing data','Deleting data','Copying data'], answer: 'Understanding data patterns', explanation: 'Data visualization uses charts and graphs to help people understand data patterns and insights.' },
+                                    { question: 'What is big data?', options: ['Large datasets','Small files','Simple calculations','Basic programs'], answer: 'Large datasets', explanation: 'Big data refers to extremely large datasets that require special tools and techniques to process.' },
+                                    { question: 'What is the first step in the data science process?', options: ['Data collection','Model deployment','Data visualization','Report writing'], answer: 'Data collection', explanation: 'Data collection is the first step where relevant data is gathered for analysis.' },
+                                    { question: 'What is data cleaning?', options: ['Removing errors from data','Washing computers','Deleting files','Installing software'], answer: 'Removing errors from data', explanation: 'Data cleaning involves removing errors, duplicates, and inconsistencies from datasets.' },
+                                    { question: 'Which tool is commonly used for big data processing?', options: ['Hadoop','Notepad','Calculator','Paint'], answer: 'Hadoop', explanation: 'Hadoop is a popular framework for processing and storing large datasets across clusters of computers.' },
+                                    { question: 'What does a data scientist need besides technical skills?', options: ['Domain expertise','Cooking skills','Driving license','Art degree'], answer: 'Domain expertise', explanation: 'Data scientists need domain expertise to understand the business context and ask the right questions.' },
+                                    { question: 'How does Netflix use data science?', options: ['Recommendation system','Video storage','Internet connection','Device manufacturing'], answer: 'Recommendation system', explanation: 'Netflix uses data science to analyze viewing patterns and recommend content to users.' }
                                 ]
                             }
                         };
