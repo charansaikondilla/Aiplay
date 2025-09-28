@@ -212,10 +212,10 @@
             
             body.mobile-version .title {
                 position: fixed !important;
-                top: 5% !important;
+                top: 2% !important;
                 left: 50% !important;
                 transform: translateX(-50%) !important;
-                font-size: 2.2em !important;
+                font-size: 1.8em !important;
                 margin: 0 !important;
                 padding: 0 !important;
                 text-shadow: 3px 3px 6px rgba(0,0,0,0.5) !important;
@@ -227,34 +227,34 @@
             
             body.mobile-version .game-message {
                 position: fixed !important;
-                top: 15% !important;
+                top: 8% !important;
                 left: 50% !important;
                 transform: translateX(-50%) !important;
-                font-size: 1.4em !important;
+                font-size: 1.2em !important;
                 margin: 0 !important;
                 text-align: center !important;
-                padding: 15px 25px !important;
+                padding: 12px 20px !important;
                 background: rgba(255, 255, 255, 0.95) !important;
-                border-radius: 20px !important;
+                border-radius: 15px !important;
                 color: var(--dark-blue) !important;
                 box-shadow: 0 6px 20px rgba(0,0,0,0.3) !important;
                 z-index: 1000 !important;
                 width: 85% !important;
-                max-width: 400px !important;
+                max-width: 350px !important;
                 text-shadow: none !important;
             }
             
             body.mobile-version .start-button, 
             body.mobile-version .restart-button {
                 position: absolute !important;
-                bottom: 15% !important;
+                bottom: 8% !important;
                 left: 50% !important;
                 transform: translateX(-50%) !important;
-                font-size: 1.3em !important;
-                padding: 15px 35px !important;
+                font-size: 1.2em !important;
+                padding: 12px 30px !important;
                 margin: 0 !important;
                 border-radius: 20px !important;
-                min-width: 200px !important;
+                min-width: 180px !important;
                 box-shadow: 0 6px 15px rgba(255,207,84,0.4) !important;
                 z-index: 1000 !important;
                 width: auto !important;
@@ -475,7 +475,7 @@
 
         // Game State Variables
         let gameState = 'start';
-        let rocket = { x: 0, y: 0, w: 50, h: 70, animFrame: 0, withFire: false, shake: 0, fallingSpeed: 0 }; // Smaller optimized size for mobile
+        let rocket = { x: 0, y: 0, w: 60, h: 80, animFrame: 0, withFire: false, shake: 0, fallingSpeed: 0, opacity: 1.0, fadeSpeed: 0 }; // Optimized size for mobile visibility
     let question = { text: '', answer: '' };
     let answers = [];
     let game1Score = 0; // from game 1
@@ -753,7 +753,7 @@
             // Position rocket above options for mobile
             rocket.x = containerWidth / 2;
             const isMobileDevice = document.body.classList.contains('mobile-version');
-            rocket.y = isMobileDevice ? (containerHeight * 0.35) : (containerHeight / 2); // Higher position for mobile
+            rocket.y = isMobileDevice ? (containerHeight * 0.45) : (containerHeight / 2); // Optimal position for mobile
             
             // Ensure canvas is visible
             canvas.style.display = 'block';
@@ -774,7 +774,11 @@
             gameState = 'playing';
             game2Score = 0;
             resolving = false;
-            rocket.y = canvas.height / 2;
+            
+            // Position rocket properly for mobile - between question and options
+            const canvasHeight = canvas.height / (window.devicePixelRatio || 1);
+            const isMobileDevice = document.body.classList.contains('mobile-version');
+            rocket.y = isMobileDevice ? (canvasHeight * 0.45) : (canvasHeight / 2);
             rocket.shake = 0;
             
             uiOverlay.style.display = 'none';
@@ -818,9 +822,9 @@
             
             // Enhanced mobile-responsive hit detection
             const isMobileDevice = document.body.classList.contains('mobile-version');
-            const boxWidth = isMobile ? Math.max(75, Math.min(85, canvasWidth / 5)) : answerBoxWidth;
-            const boxHeight = isMobile ? Math.max(45, Math.min(55, canvasHeight / 12)) : answerBoxHeight;
-            const margin = isMobile ? Math.max(6, canvasWidth / 50) : answerBoxMargin;
+            const boxWidth = isMobileDevice ? Math.max(80, Math.min(90, canvasWidth / 4.5)) : answerBoxWidth;
+            const boxHeight = isMobileDevice ? Math.max(50, Math.min(60, canvasHeight / 10)) : answerBoxHeight;
+            const margin = isMobileDevice ? Math.max(6, canvasWidth / 50) : answerBoxMargin;
             
             const totalWidth = (boxWidth * 4) + (margin * 3);
             const startX = (canvasWidth - totalWidth) / 2;
@@ -860,13 +864,16 @@
             rocket.animFrame = 0;
             rocket.fallingSpeed = 0;
             rocket.shake = 20;
+            rocket.opacity = 1.0; // Start with full opacity
+            rocket.fadeSpeed = 0.5; // Fade rate
         }
 
         function update(deltaTime) {
             switch (gameState) {
                 case 'launching':
                     rocket.animFrame += deltaTime * 1.5;
-                    rocket.y -= rocket.animFrame * 150 * deltaTime;
+                    rocket.y -= rocket.animFrame * 200 * deltaTime; // Faster upward movement
+                    rocket.opacity = 1.0; // Ensure full opacity during launch
                     if (rocket.y < -rocket.h && !resolving) {
                         resolving = true;
                         // Count a correct and advance or finish
@@ -877,15 +884,23 @@
                     break;
                 case 'crashing':
                     if (rocket.animFrame < 1) {
-                         // Initial upward bounce
+                         // Initial upward bounce with fire effect
                         rocket.animFrame += deltaTime * 2;
-                        rocket.y -= Math.sin(rocket.animFrame * Math.PI) * 100 * deltaTime;
+                        rocket.y -= Math.sin(rocket.animFrame * Math.PI) * 50 * deltaTime;
+                        rocket.withFire = true; // Show fire during crash
                     } else {
-                        rocket.fallingSpeed += 9.8 * deltaTime * 10;
+                        // Fade out and fall
+                        rocket.withFire = false;
+                        rocket.opacity -= rocket.fadeSpeed * deltaTime;
+                        rocket.fallingSpeed += 9.8 * deltaTime * 8;
                         rocket.y += rocket.fallingSpeed * deltaTime;
+                        
+                        // Ensure opacity doesn't go below 0
+                        if (rocket.opacity < 0) rocket.opacity = 0;
                     }
                     
-                    if (rocket.y > canvas.height + rocket.h && !resolving) {
+                    const canvasHeight = canvas.height / (window.devicePixelRatio || 1);
+                    if (rocket.y > canvasHeight + rocket.h && !resolving) {
                         resolving = true;
                         gameState = 'transition';
                         proceedAfterAnswer(false);
@@ -902,11 +917,15 @@
         function proceedAfterAnswer(correct) {
             // brief pause, then next or end
             setTimeout(() => {
-                rocket.y = canvas.height / 2;
+                const canvasHeight = canvas.height / (window.devicePixelRatio || 1);
+                const isMobileDevice = document.body.classList.contains('mobile-version');
+                rocket.y = isMobileDevice ? (canvasHeight * 0.45) : (canvasHeight / 2);
                 rocket.withFire = false;
                 rocket.animFrame = 0;
                 rocket.fallingSpeed = 0;
                 rocket.shake = 0;
+                rocket.opacity = 1.0; // Reset opacity
+                rocket.fadeSpeed = 0;
                 qIndex = Math.min(qCountGame2, qIndex + 1);
                 if (qIndex >= qCountGame2) {
                     endGame();
@@ -937,6 +956,7 @@
         // Drawing functions
         function drawRocket(x, y, w, h, withFire) {
             ctx.save();
+            ctx.globalAlpha = rocket.opacity || 1.0; // Apply opacity
             ctx.translate(x, y);
 
             if (rocket.shake > 0) {
@@ -1001,14 +1021,14 @@
             
             // Enhanced mobile detection and sizing
             const isMobile = document.body.classList.contains('mobile-version');
-            const boxWidth = isMobile ? Math.max(75, Math.min(85, canvasWidth / 5)) : answerBoxWidth;
-            const boxHeight = isMobile ? Math.max(45, Math.min(55, canvasHeight / 12)) : answerBoxHeight;
+            const boxWidth = isMobile ? Math.max(80, Math.min(90, canvasWidth / 4.5)) : answerBoxWidth;
+            const boxHeight = isMobile ? Math.max(50, Math.min(60, canvasHeight / 10)) : answerBoxHeight;
             const margin = isMobile ? Math.max(6, canvasWidth / 50) : answerBoxMargin;
             const fontSize = isMobile ? Math.max(14, Math.min(18, boxWidth / 5)) : 24;
             
             const totalWidth = (boxWidth * 4) + (margin * 3);
             const startX = (canvasWidth - totalWidth) / 2;
-            const boxY = canvasHeight - boxHeight - (isMobile ? Math.max(100, canvasHeight / 6) : 40);
+            const boxY = canvasHeight - boxHeight - (isMobile ? Math.max(120, canvasHeight / 5) : 40); // Even lower for mobile
             
             answers.forEach((ans, index) => {
                 const boxX = startX + index * (boxWidth + margin);
@@ -1058,8 +1078,8 @@
                 if (gameState === 'playing' || gameState === 'crashing') {
                     // Draw question text with enhanced mobile responsiveness
                     const isMobile = document.body.classList.contains('mobile-version');
-                    const questionFontSize = isMobile ? Math.max(18, Math.min(24, canvasWidth / 20)) : 40;
-                    const questionY = isMobile ? Math.max(60, canvasHeight / 12) : 80;
+                    const questionFontSize = isMobile ? Math.max(16, Math.min(20, canvasWidth / 25)) : 40;
+                    const questionY = isMobile ? Math.max(40, canvasHeight / 15) : 80;
                     
                     ctx.font = `bold ${questionFontSize}px "Poppins"`;
                     ctx.fillStyle = white;
